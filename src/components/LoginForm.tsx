@@ -6,6 +6,7 @@ import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Alert } from "./Alert";
+import { auth } from "../lib/firebase";
 
 const schema = yup.object().shape({
   email: yup.string().required(),
@@ -31,6 +32,7 @@ export function LoginForm() {
   const onSubmit = async (data: AuthFormValues) => {
     try {
       await login(data.email, data.password);
+      console.log(auth.currentUser?.uid);
       navigate("/dashboard");
     } catch (error: any) {
       console.log("Login error:", error);
