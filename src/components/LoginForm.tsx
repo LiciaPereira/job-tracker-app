@@ -1,8 +1,11 @@
 import { useForm } from "react-hook-form";
 import { login } from "../services/authService";
-import { AuthFormValues } from "../types/AuthFormValues";
+import { AuthFormValues } from "../features/auth/AuthFormValues";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Alert } from "./Alert";
 
 const schema = yup.object().shape({
   email: yup.string().required(),
@@ -10,6 +13,8 @@ const schema = yup.object().shape({
 });
 
 export function LoginForm() {
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
@@ -18,23 +23,41 @@ export function LoginForm() {
     resolver: yupResolver(schema),
   });
 
+  const [alert, setAlert] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+
   const onSubmit = async (data: AuthFormValues) => {
     try {
       await login(data.email, data.password);
+      navigate("/dashboard");
     } catch (error: any) {
-      alert(error.message);
+      console.log("Login error:", error);
+      setAlert({ message: error.message, type: "error" });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <input {...register("email")} placeholder="Email" />
-      <p>{errors.email?.message}</p>
+    <div>
+      {/* custom alert for general messages */}
+      {alert && (
+        <Alert
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert(null)}
+          duration={5000}
+        />
+      )}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <input {...register("email")} placeholder="Email" />
+        <p>{errors.email?.message}</p>
 
-      <input {...register("password")} placeholder="Password" />
-      <p>{errors.password?.message}</p>
+        <input {...register("password")} placeholder="Password" />
+        <p>{errors.password?.message}</p>
 
-      <button type="submit">Login</button>
-    </form>
+        <button type="submit">Login</button>
+      </form>
+    </div>
   );
 }

@@ -11,7 +11,11 @@ export default function HomePage() {
       style={{ maxWidth: 400, margin: "auto", padding: 20 }}
     >
       <h1>{isLogin ? "Login" : "Sign Up"}</h1>
-      {isLogin ? <LoginForm /> : <SignUpForm />}
+      {isLogin ? (
+        <LoginForm />
+      ) : (
+        <SignUpForm onSuccess={() => setIsLogin(true)} />
+      )}
       <p style={{ marginTop: 20 }}>
         {isLogin ? "Don't Have an account?" : "Already have an account?"}{" "}
         <a
