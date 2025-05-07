@@ -5,11 +5,27 @@ import DashboardPage from "./pages/DashboardPage";
 import AddJobPage from "./pages/AddJobPage";
 import JobListPage from "./pages/JobListPage";
 import JobDetailsPage from "./pages/JobDetailsPage";
+import { Navbar } from "./components/Navbar";
+import { useAuth } from "./hooks/useAuth";
+
+function Layout({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  return (
+    <div>
+      {user && <Navbar />}
+      <main className={`min-h-screen bg-gradient-to-br from-indigo-50 to-white ${
+        user ? 'pt-16' : ''
+      }`}>
+        {children}
+      </main>
+    </div>
+  );
+}
 
 function App() {
   return (
-    <div>
-      <Router>
+    <Router>
+      <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route
@@ -19,7 +35,7 @@ function App() {
                 <DashboardPage />
               </PrivateRoute>
             }
-          ></Route>
+          />
           <Route
             path="/add-job"
             element={
@@ -27,7 +43,7 @@ function App() {
                 <AddJobPage />
               </PrivateRoute>
             }
-          ></Route>
+          />
           <Route
             path="/jobs"
             element={
@@ -45,8 +61,8 @@ function App() {
             }
           />
         </Routes>
-      </Router>
-    </div>
+      </Layout>
+    </Router>
   );
 }
 
