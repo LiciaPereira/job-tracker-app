@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { getJobsByUser } from "../services/getJobByUser";
+import { getJobsByUser } from "../features/jobs/services/getJobByUser";
 import { SummaryCards } from "../features/jobs/SummaryCards";
 import { RemindersPanel } from "../features/jobs/RemindersPanel";
 

@@ -1,4 +1,4 @@
-import { db } from "../lib/firebase";
+import { db } from "../../../lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
 export async function getJobsByUser(userId: string) {

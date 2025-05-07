@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import { PrivateRoute } from "./routes/PrivateRoute";
 import DashboardPage from "./pages/DashboardPage";
+import AddJobPage from "./pages/AddJobPage";
 
 function App() {
   return (
@@ -14,6 +15,14 @@ function App() {
             element={
               <PrivateRoute>
                 <DashboardPage />
+              </PrivateRoute>
+            }
+          ></Route>
+          <Route
+            path="/add-job"
+            element={
+              <PrivateRoute>
+                <AddJobPage />
               </PrivateRoute>
             }
           ></Route>
