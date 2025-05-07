@@ -1,33 +1,57 @@
-import { useEffect } from "react";
-import { useBeforeUnload } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface BlockerOptions {
   when: boolean;
   message?: string;
+  onConfirm: () => void;
+  onCancel?: () => void;
 }
 
 //prevent the user of leaving with unsaved changes
 export function useBlocker({
   when,
-  message = "You have unsaved changes. Are you sure you want to leave?",
+  message,
+  onConfirm,
+  onCancel,
 }: BlockerOptions) {
-  useBeforeUnload((event) => {
-    if (when) {
-      event.preventDefault();
-      event.returnValue = message;
-    }
-  });
+  const navigate = useNavigate();
+  const location = useLocation();
+  const lastLocation = useRef(location.pathname);
 
   useEffect(() => {
     if (!when) return;
 
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = message;
-      return message;
+    const unblock = () => {
+      //this logic only runs if they confirm the leave
+      onConfirm();
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [when, message]);
+    const beforeUnloadHandler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = message || "";
+    };
+
+    const checkLocationChange = () => {
+      if (location.pathname !== lastLocation.current) {
+        const confirmLeave = window.confirm(message || "Leave without saving?");
+        if (confirmLeave) {
+          unblock();
+        } else {
+          if (onCancel) onCancel();
+          navigate(lastLocation.current, { replace: true });
+        }
+      } else {
+        lastLocation.current = location.pathname;
+      }
+    };
+
+    window.addEventListener("beforeunload", beforeUnloadHandler);
+    const interval = setInterval(checkLocationChange, 100);
+
+    return () => {
+      window.removeEventListener("beforeunload", beforeUnloadHandler);
+      clearInterval(interval);
+    };
+  }, [when, location.pathname, message, onConfirm, onCancel, navigate]);
 }

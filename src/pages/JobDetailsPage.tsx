@@ -6,11 +6,10 @@ import * as yup from "yup";
 import {
   getJobById,
   deleteJobById,
+  updateJob,
 } from "../features/jobs/services/jobService";
 import { useAuth } from "../hooks/useAuth";
 import { Alert } from "../components/Alert";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
 import { useBlocker } from "../hooks/useBlocker";
 
 interface Job {
@@ -47,7 +46,7 @@ export default function JobDetailsPage() {
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState<{
-    type: "success" | "error";
+    type: "success" | "error" | "info";
     message: string;
   } | null>(null);
 
@@ -87,6 +86,15 @@ export default function JobDetailsPage() {
   useBlocker({
     when: isDirty,
     message: "You have unsaved changes. Are you sure you want to leave?",
+    onConfirm: () => {
+      // allow routing to continue (dirty flag will reset on unmount)
+    },
+    onCancel: () => {
+      setAlert({
+        type: "info",
+        message: "Navigation cancelled. Changes not saved.",
+      });
+    },
   });
 
   const handleDelete = async () => {
@@ -102,11 +110,10 @@ export default function JobDetailsPage() {
   };
 
   const onSubmit = handleSubmit(async (data: FormValues) => {
-    if (!jobId) return;
+    if (!jobId || !user) return;
 
     try {
-      const ref = doc(db, "jobs", jobId);
-      await updateDoc(ref, {
+      await updateJob(jobId, user.uid, {
         company: data.company,
         title: data.title,
         status: data.status,

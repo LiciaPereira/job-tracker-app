@@ -1,16 +1,18 @@
 import { db } from "../../../lib/firebase";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { createReminder } from "./reminderService";
+import { addDays } from "date-fns";
 
 interface JobData {
   company: string;
   title: string;
   status: "applied" | "interviewing" | "offered" | "rejected";
-  appliedAt?: Date; // Optional and matches FormValues
-  notes?: string; // Optional and matches FormValues
+  appliedAt?: Date;
+  notes?: string;
 }
 
 export async function addJob(userId: string, job: JobData) {
-  return addDoc(collection(db, "jobs"), {
+  const jobDoc = await addDoc(collection(db, "jobs"), {
     ...job,
     userId,
     appliedAt: job.appliedAt
@@ -18,4 +20,16 @@ export async function addJob(userId: string, job: JobData) {
       : null,
     createdAt: Timestamp.now(),
   });
+
+  if (job.status === "applied") {
+    await createReminder({
+      jobId: jobDoc.id,
+      userId,
+      type: "followUp",
+      dueDate: addDays(new Date(), 3),
+      completed: false,
+    });
+  }
+
+  return jobDoc;
 }
