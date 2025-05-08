@@ -5,6 +5,7 @@ import DashboardPage from "./pages/DashboardPage";
 import AddJobPage from "./pages/AddJobPage";
 import JobListPage from "./pages/JobListPage";
 import JobDetailsPage from "./pages/JobDetailsPage";
+import SettingsPage from "./pages/SettingsPage";
 import { Navbar } from "./components/Navbar";
 import { useAuth } from "./hooks/useAuth";
 
@@ -59,6 +60,14 @@ function App() {
             element={
               <PrivateRoute>
                 <JobDetailsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <PrivateRoute>
+                <SettingsPage />
               </PrivateRoute>
             }
           />

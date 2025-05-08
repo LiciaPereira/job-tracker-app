@@ -37,11 +37,7 @@ export default function HomePage() {
               : "translate-y-0 opacity-100"
           }`}
         >
-          {isLogin ? (
-            <LoginForm />
-          ) : (
-            <SignUpForm onSuccess={() => setIsLogin(true)} />
-          )}
+          {isLogin ? <LoginForm /> : <SignUpForm />}
         </div>
 
         <div className="mt-6 text-center">

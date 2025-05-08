@@ -1,95 +1,143 @@
 import { useForm } from "react-hook-form";
-import { AuthFormValues } from "../features/auth/AuthFormValues";
-import { signUp } from "../services/authService";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useState } from "react";
+import { signUp } from "../services/authService";
 import { Alert } from "./Alert";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { updateProfile } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
+interface SignUpFormValues {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+interface SignUpFormProps {
+  onSuccess?: () => void;
+}
+
+//validate signup form inputs
 const schema = yup.object().shape({
-  email: yup
-    .string()
-    .email("Please enter a valid email")
-    .required("Email is required"),
+  firstName: yup.string().required("First name is required"),
+  lastName: yup.string().required("Last name is required"),
+  email: yup.string().email("Invalid email").required("Email is required"),
   password: yup
     .string()
-    .min(8, "Password must be at least 8 characters")
-    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-    .matches(/[0-9]/, "Password must contain at least one number")
+    .min(6, "Password must be at least 6 characters")
     .required("Password is required"),
   confirmPassword: yup
     .string()
     .oneOf([yup.ref("password")], "Passwords must match")
-    .required("Please confirm your password"),
+    .required("Confirm password is required"),
 });
 
-interface Props {
-  onSuccess: () => void;
-}
-
-export function SignUpForm({ onSuccess }: Props) {
-  const [isLoading, setIsLoading] = useState(false);
+export function SignUpForm({ onSuccess }: SignUpFormProps) {
+  //setup form with validation
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<AuthFormValues>({
-    resolver: yupResolver(schema) as any,
-    mode: "onBlur",
+  } = useForm<SignUpFormValues>({
+    resolver: yupResolver(schema),
   });
 
   const [alert, setAlert] = useState<{
-    message: string;
     type: "success" | "error";
+    message: string;
   } | null>(null);
+  const navigate = useNavigate();
 
-  const onSubmit = async (data: AuthFormValues) => {
-    setIsLoading(true);
+  const onSubmit = async (data: SignUpFormValues) => {
     try {
-      await signUp(data.email, data.password);
-      setAlert({
-        message: "Account created successfully! Please log in.",
-        type: "success",
+      //create firebase auth account
+      const userCredential = await signUp(data.email, data.password);
+      const user = userCredential.user;
+
+      //set display name in firebase auth
+      const fullName = `${data.firstName} ${data.lastName}`;
+      await updateProfile(user, {
+        displayName: fullName,
       });
-      setTimeout(() => {
-        onSuccess();
-      }, 2000);
+
+      //store additional user data in firestore
+      await setDoc(doc(db, "users", user.uid), {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        createdAt: new Date(),
+      });
+
+      setAlert({
+        type: "success",
+        message: "Account created successfully!",
+      });
+
+      //redirect after successful signup
+      setTimeout(() => navigate("/dashboard"), 2000);
     } catch (error: any) {
-      const errorMessage =
-        error.code === "auth/email-already-in-use"
-          ? "An account with this email already exists"
-          : "An error occurred during sign up";
-      setAlert({ message: errorMessage, type: "error" });
-    } finally {
-      setIsLoading(false);
+      setAlert({
+        type: "error",
+        message: error.message,
+      });
     }
   };
 
   return (
-    <div className="w-full">
-      {alert && (
-        <Alert
-          type={alert.type}
-          message={alert.message}
-          onClose={() => setAlert(null)}
-          duration={5000}
-        />
-      )}
+    <div className="w-full max-w-md">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {alert && (
+          <Alert
+            type={alert.type}
+            message={alert.message}
+            onClose={() => setAlert(null)}
+          />
+        )}
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              First Name
+            </label>
+            <input
+              {...register("firstName")}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+            {errors.firstName && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.firstName.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Last Name
+            </label>
+            <input
+              {...register("lastName")}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+            {errors.lastName && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.lastName.message}
+              </p>
+            )}
+          </div>
+        </div>
+
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label className="block text-sm font-medium text-gray-700">
             Email
           </label>
           <input
-            id="email"
-            type="email"
             {...register("email")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="your@email.com"
+            type="email"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />
           {errors.email && (
             <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -97,18 +145,13 @@ export function SignUpForm({ onSuccess }: Props) {
         </div>
 
         <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label className="block text-sm font-medium text-gray-700">
             Password
           </label>
           <input
-            id="password"
-            type="password"
             {...register("password")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Create a strong password"
+            type="password"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />
           {errors.password && (
             <p className="mt-1 text-sm text-red-600">
@@ -118,18 +161,13 @@ export function SignUpForm({ onSuccess }: Props) {
         </div>
 
         <div>
-          <label
-            htmlFor="confirmPassword"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label className="block text-sm font-medium text-gray-700">
             Confirm Password
           </label>
           <input
-            id="confirmPassword"
-            type="password"
             {...register("confirmPassword")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Confirm your password"
+            type="password"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />
           {errors.confirmPassword && (
             <p className="mt-1 text-sm text-red-600">
@@ -140,41 +178,9 @@ export function SignUpForm({ onSuccess }: Props) {
 
         <button
           type="submit"
-          disabled={isLoading}
-          className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
-            ${
-              isLoading
-                ? "bg-indigo-400 cursor-not-allowed"
-                : "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            } transition-colors duration-200`}
+          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
-          {isLoading ? (
-            <span className="flex items-center justify-center">
-              <svg
-                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Creating account...
-            </span>
-          ) : (
-            "Sign Up"
-          )}
+          Sign Up
         </button>
       </form>
     </div>
