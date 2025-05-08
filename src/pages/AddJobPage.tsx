@@ -104,6 +104,7 @@ export default function AddJobPage() {
           label="Application Date"
           type="date"
           {...register("appliedAt")}
+          defaultValue={new Date().toISOString().split("T")[0]}
         />
 
         <TextArea label="Notes" rows={4} {...register("notes")} />
