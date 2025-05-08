@@ -16,12 +16,12 @@ export function SummaryCards({ stats }: SummaryCardsProps) {
       <StatCard
         label="Interviews"
         value={stats.interviews}
-        colorClass="text-green-600"
+        colorClass="text-blue-600"
       />
       <StatCard
         label="Offers"
         value={stats.offers}
-        colorClass="text-blue-600"
+        colorClass="text-green-600"
       />
       <StatCard
         label="Rejections"

@@ -18,8 +18,8 @@ export function Navbar() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   //handle user logout
@@ -39,8 +39,8 @@ export function Navbar() {
         setIsMobileMenuOpen(false);
       }
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   //close mobile menu on navigation
@@ -51,17 +51,21 @@ export function Navbar() {
   if (!user) return null;
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-200 ${
-      isScrolled ? 'bg-white text-gray-800 shadow-lg' : 'bg-transparent text-white'
-    }`}>
+    <nav
+      className={`fixed top-0 w-full z-50 transition-all duration-200 ${
+        isScrolled
+          ? "bg-white shadow-lg"
+          : "bg-gradient-to-r from-indigo-600/95 to-purple-600/95 backdrop-blur-sm"
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center">
-            <Link 
-              to="/dashboard" 
+            <Link
+              to="/dashboard"
               className={`text-xl font-bold transition-colors duration-200 ${
-                isScrolled ? 'text-indigo-600' : 'text-white'
-              }`} 
+                isScrolled ? "text-indigo-600" : "text-white"
+              }`}
               onClick={handleNavigation}
             >
               Job Tracker
@@ -72,12 +76,12 @@ export function Navbar() {
                   to="/dashboard"
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                     isActive("/dashboard")
-                      ? isScrolled 
-                        ? 'bg-indigo-100 text-indigo-700' 
-                        : 'bg-white/10 text-white'
+                      ? isScrolled
+                        ? "bg-indigo-100 text-indigo-700"
+                        : "bg-indigo-700 text-white"
                       : isScrolled
-                        ? 'text-gray-600 hover:bg-gray-100'
-                        : 'text-white/90 hover:bg-white/10'
+                        ? "text-gray-600 hover:bg-gray-100"
+                        : "text-white hover:bg-indigo-700/50"
                   }`}
                   onClick={handleNavigation}
                 >
@@ -87,12 +91,12 @@ export function Navbar() {
                   to="/jobs"
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                     isActive("/jobs")
-                      ? isScrolled 
-                        ? 'bg-indigo-100 text-indigo-700' 
-                        : 'bg-white/10 text-white'
+                      ? isScrolled
+                        ? "bg-indigo-100 text-indigo-700"
+                        : "bg-indigo-700 text-white"
                       : isScrolled
-                        ? 'text-gray-600 hover:bg-gray-100'
-                        : 'text-white/90 hover:bg-white/10'
+                        ? "text-gray-600 hover:bg-gray-100"
+                        : "text-white hover:bg-indigo-700/50"
                   }`}
                   onClick={handleNavigation}
                 >
@@ -102,12 +106,12 @@ export function Navbar() {
                   to="/add-job"
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                     isActive("/add-job")
-                      ? isScrolled 
-                        ? 'bg-indigo-100 text-indigo-700' 
-                        : 'bg-white/10 text-white'
+                      ? isScrolled
+                        ? "bg-indigo-100 text-indigo-700"
+                        : "bg-indigo-700 text-white"
                       : isScrolled
-                        ? 'text-gray-600 hover:bg-gray-100'
-                        : 'text-white/90 hover:bg-white/10'
+                        ? "text-gray-600 hover:bg-gray-100"
+                        : "text-white hover:bg-indigo-700/50"
                   }`}
                   onClick={handleNavigation}
                 >
@@ -118,31 +122,33 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* User info */}
             <div className="hidden md:flex items-center">
-              <span className={`text-sm ${isScrolled ? 'text-gray-600' : 'text-white/90'}`}>
+              <span
+                className={`text-sm ${
+                  isScrolled ? "text-gray-600" : "text-white/90"
+                }`}
+              >
                 {user.email}
               </span>
               <button
                 onClick={handleLogout}
                 className={`ml-4 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   isScrolled
-                    ? 'text-gray-600 hover:bg-gray-100'
-                    : 'text-white/90 hover:bg-white/10'
+                    ? "text-gray-600 hover:bg-gray-100"
+                    : "text-white hover:bg-indigo-700/50"
                 }`}
               >
                 Logout
               </button>
             </div>
-            
-            {/* Mobile menu button */}
+
             <div className="md:hidden flex items-center">
-              <button 
+              <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className={`p-2 rounded-md transition-colors duration-200 ${
                   isScrolled
-                    ? 'text-gray-600 hover:bg-gray-100'
-                    : 'text-white/90 hover:bg-white/10'
+                    ? "text-gray-600 hover:bg-gray-100"
+                    : "text-white hover:bg-indigo-700/50"
                 }`}
                 aria-label="Toggle menu"
               >
@@ -156,9 +162,10 @@ export function Navbar() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth="2"
-                    d={isMobileMenuOpen 
-                      ? "M6 18L18 6M6 6l12 12" 
-                      : "M4 6h16M4 12h16M4 18h16"
+                    d={
+                      isMobileMenuOpen
+                        ? "M6 18L18 6M6 6l12 12"
+                        : "M4 6h16M4 12h16M4 18h16"
                     }
                   />
                 </svg>
@@ -168,27 +175,28 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu with transition */}
-      <div 
+      <div
         className={`md:hidden transition-all duration-300 ease-in-out ${
-          isMobileMenuOpen 
-            ? 'max-h-96 opacity-100' 
-            : 'max-h-0 opacity-0 overflow-hidden'
+          isMobileMenuOpen
+            ? "max-h-96 opacity-100"
+            : "max-h-0 opacity-0 overflow-hidden"
         }`}
       >
-        <div className={`px-2 pt-2 pb-3 space-y-1 sm:px-3 ${
-          isScrolled ? 'bg-white' : 'bg-indigo-600'
-        }`}>
+        <div
+          className={`px-2 pt-2 pb-3 space-y-1 sm:px-3 ${
+            isScrolled ? "bg-white" : "bg-indigo-700"
+          }`}
+        >
           <Link
             to="/dashboard"
             className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
               isActive("/dashboard")
-                ? isScrolled 
-                  ? 'bg-indigo-100 text-indigo-700' 
-                  : 'bg-white/10 text-white'
+                ? isScrolled
+                  ? "bg-indigo-100 text-indigo-700"
+                  : "bg-indigo-800 text-white"
                 : isScrolled
-                  ? 'text-gray-600 hover:bg-gray-100'
-                  : 'text-white/90 hover:bg-white/10'
+                  ? "text-gray-600 hover:bg-gray-100"
+                  : "text-white hover:bg-indigo-800"
             }`}
             onClick={handleNavigation}
           >
@@ -198,12 +206,12 @@ export function Navbar() {
             to="/jobs"
             className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
               isActive("/jobs")
-                ? isScrolled 
-                  ? 'bg-indigo-100 text-indigo-700' 
-                  : 'bg-white/10 text-white'
+                ? isScrolled
+                  ? "bg-indigo-100 text-indigo-700"
+                  : "bg-indigo-800 text-white"
                 : isScrolled
-                  ? 'text-gray-600 hover:bg-gray-100'
-                  : 'text-white/90 hover:bg-white/10'
+                  ? "text-gray-600 hover:bg-gray-100"
+                  : "text-white hover:bg-indigo-800"
             }`}
             onClick={handleNavigation}
           >
@@ -213,20 +221,23 @@ export function Navbar() {
             to="/add-job"
             className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
               isActive("/add-job")
-                ? isScrolled 
-                  ? 'bg-indigo-100 text-indigo-700' 
-                  : 'bg-white/10 text-white'
+                ? isScrolled
+                  ? "bg-indigo-100 text-indigo-700"
+                  : "bg-indigo-800 text-white"
                 : isScrolled
-                  ? 'text-gray-600 hover:bg-gray-100'
-                  : 'text-white/90 hover:bg-white/10'
+                  ? "text-gray-600 hover:bg-gray-100"
+                  : "text-white hover:bg-indigo-800"
             }`}
             onClick={handleNavigation}
           >
             Add Job
           </Link>
-          {/* Mobile user info */}
-          <div className="px-3 py-2 text-sm">
-            <span className={`block mb-2 ${isScrolled ? 'text-gray-600' : 'text-white/90'}`}>
+          <div className="px-3 py-2">
+            <span
+              className={`block text-sm mb-2 ${
+                isScrolled ? "text-gray-600" : "text-white/90"
+              }`}
+            >
               {user.email}
             </span>
             <button
@@ -234,10 +245,10 @@ export function Navbar() {
                 handleLogout();
                 handleNavigation();
               }}
-              className={`w-full text-left block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+              className={`w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
                 isScrolled
-                  ? 'text-gray-600 hover:bg-gray-100'
-                  : 'text-white/90 hover:bg-white/10'
+                  ? "text-gray-600 hover:bg-gray-100"
+                  : "text-white hover:bg-indigo-800"
               }`}
             >
               Logout

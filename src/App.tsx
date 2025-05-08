@@ -13,9 +13,11 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div>
       {user && <Navbar />}
-      <main className={`min-h-screen bg-gradient-to-br from-indigo-50 to-white ${
-        user ? 'pt-16' : ''
-      }`}>
+      <main
+        className={`min-h-screen bg-gradient-to-br from-indigo-50 to-white ${
+          user ? "pt-16" : ""
+        }`}
+      >
         {children}
       </main>
     </div>
