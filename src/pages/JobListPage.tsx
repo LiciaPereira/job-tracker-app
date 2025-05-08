@@ -3,6 +3,8 @@ import { useAuth } from "../hooks/useAuth";
 import { getJobsByUser } from "../features/jobs/services/getJobByUser";
 import { Link } from "react-router-dom";
 import { exportToCSV } from "../utils/csvExport";
+import { Card, Text, Button, Select } from "../components/ui";
+import { useTheme } from "../hooks/useTheme";
 
 interface Job {
   id: string;
@@ -15,6 +17,7 @@ interface Job {
 
 export default function JobListPage() {
   const { user, loading } = useAuth();
+  const { theme } = useTheme();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filter, setFilter] = useState<string>("");
   const [isExporting, setIsExporting] = useState(false);
@@ -46,22 +49,27 @@ export default function JobListPage() {
     }
   };
 
+  const statusOptions = [
+    { value: "", label: "All" },
+    { value: "applied", label: "Applied" },
+    { value: "interviewing", label: "Interviewing" },
+    { value: "offered", label: "Offered" },
+    { value: "rejected", label: "Rejected" },
+  ];
+
   if (loading) return <div>Loading...</div>;
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Your Job Applications</h1>
-        <button
+    <Card className="max-w-4xl mx-auto p-6 rounded-lg">
+      <div
+        className={`flex justify-between items-center mb-6 ${theme.colors.text.body}`}
+      >
+        <Text variant="h1">Your Job Applications</Text>
+        <Button
           onClick={handleExport}
           disabled={isExporting || jobs.length === 0}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 
-            ${
-              jobs.length === 0
-                ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                : isExporting
-                  ? "bg-indigo-400 cursor-wait text-white"
-                  : "bg-indigo-600 hover:bg-indigo-700 text-white"
-            }`}
+          variant={jobs.length === 0 ? "secondary" : "primary"}
+          size="md"
+          className={isExporting ? "cursor-wait" : ""}
         >
           {isExporting ? (
             <span className="flex items-center">
@@ -90,41 +98,43 @@ export default function JobListPage() {
           ) : (
             "Export to CSV"
           )}
-        </button>
+        </Button>
       </div>
 
-      <div className="mb-4">
-        <label className="mr-2 font-medium">Filter by status:</label>
+      <div className="mb-4 flex items-center">
+        <Text variant="label" className="mr-2">
+          Filter by status:
+        </Text>
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="border p-2 rounded"
+          className={theme.elements.input}
         >
-          <option value="">All</option>
-          <option value="applied">Applied</option>
-          <option value="interviewing">Interviewing</option>
-          <option value="offered">Offered</option>
-          <option value="rejected">Rejected</option>
+          {statusOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
       </div>
 
       {filteredJobs.length === 0 ? (
-        <p className="text-gray-600">No jobs found.</p>
+        <Text variant="small">No jobs found.</Text>
       ) : (
         <ul className="space-y-4">
           {filteredJobs.map((job) => (
             <li
               key={job.id}
-              className="border p-4 rounded hover:shadow transition"
+              className={`border ${theme.colors.border} p-4 rounded ${theme.colors.background.card} hover:shadow transition`}
             >
-              <h2 className="text-lg font-semibold">{job.title}</h2>
-              <p className="text-sm text-gray-600">{job.company}</p>
-              <p className="text-sm mt-1">
+              <Text variant="h3">{job.title}</Text>
+              <Text variant="small">{job.company}</Text>
+              <p className="text-sm mt-1 text-gray-700 dark:text-gray-300">
                 Status: <span className="font-medium">{job.status}</span>
               </p>
               <Link
                 to={`/job/${job.id}`}
-                className="text-blue-600 text-sm mt-2 inline-block"
+                className={`${theme.colors.primary.default} text-sm mt-2 inline-block`}
               >
                 View details →
               </Link>
@@ -132,6 +142,6 @@ export default function JobListPage() {
           ))}
         </ul>
       )}
-    </div>
+    </Card>
   );
 }

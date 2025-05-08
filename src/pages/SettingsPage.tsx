@@ -7,6 +7,8 @@ import { Alert } from "../components/Alert";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { Card, Text, Input, Button } from "../components/ui";
+import { useTheme } from "../hooks/useTheme";
 
 interface ProfileFormValues {
   firstName: string;
@@ -42,6 +44,7 @@ const passwordSchema = yup.object().shape({
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [alert, setAlert] = useState<{
     type: "success" | "error";
     message: string;
@@ -126,8 +129,10 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+    <Card className="max-w-2xl mx-auto p-6 rounded-lg">
+      <Text variant="h1" className="mb-6">
+        Settings
+      </Text>
 
       {alert && (
         <Alert
@@ -138,126 +143,86 @@ export default function SettingsPage() {
       )}
 
       <div className="space-y-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Profile Settings</h2>
+        <Card
+          className={`${theme.colors.background.card} p-6 rounded-lg shadow`}
+        >
+          <Text variant="h2" className="mb-4">
+            Profile Settings
+          </Text>
           <form
             onSubmit={handleProfileSubmit(onProfileSubmit)}
             className="space-y-4"
           >
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  First Name
-                </label>
-                <input
+                <Input
+                  label="First Name"
                   {...registerProfile("firstName")}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  error={profileErrors.firstName?.message}
                 />
-                {profileErrors.firstName && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {profileErrors.firstName.message}
-                  </p>
-                )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Last Name
-                </label>
-                <input
+                <Input
+                  label="Last Name"
                   {...registerProfile("lastName")}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  error={profileErrors.lastName?.message}
                 />
-                {profileErrors.lastName && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {profileErrors.lastName.message}
-                  </p>
-                )}
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                {...registerProfile("email")}
+              <Input
+                label="Email"
                 type="email"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                {...registerProfile("email")}
+                error={profileErrors.email?.message}
               />
-              {profileErrors.email && (
-                <p className="mt-1 text-sm text-red-600">
-                  {profileErrors.email.message}
-                </p>
-              )}
             </div>
-            <button
-              type="submit"
-              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
+            <Button type="submit" className="w-full">
               Update Profile
-            </button>
+            </Button>
           </form>
-        </div>
+        </Card>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Change Password</h2>
+        <Card
+          className={`${theme.colors.background.card} p-6 rounded-lg shadow`}
+        >
+          <Text variant="h2" className="mb-4">
+            Change Password
+          </Text>
           <form
             onSubmit={handlePasswordSubmit(onPasswordSubmit)}
             className="space-y-4"
           >
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Current Password
-              </label>
-              <input
+              <Input
+                label="Current Password"
+                type="password"
                 {...registerPassword("currentPassword")}
-                type="password"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                error={passwordErrors.currentPassword?.message}
               />
-              {passwordErrors.currentPassword && (
-                <p className="mt-1 text-sm text-red-600">
-                  {passwordErrors.currentPassword.message}
-                </p>
-              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                New Password
-              </label>
-              <input
+              <Input
+                label="New Password"
+                type="password"
                 {...registerPassword("newPassword")}
-                type="password"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                error={passwordErrors.newPassword?.message}
               />
-              {passwordErrors.newPassword && (
-                <p className="mt-1 text-sm text-red-600">
-                  {passwordErrors.newPassword.message}
-                </p>
-              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Confirm New Password
-              </label>
-              <input
-                {...registerPassword("confirmPassword")}
+              <Input
+                label="Confirm New Password"
                 type="password"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                {...registerPassword("confirmPassword")}
+                error={passwordErrors.confirmPassword?.message}
               />
-              {passwordErrors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">
-                  {passwordErrors.confirmPassword.message}
-                </p>
-              )}
             </div>
-            <button
-              type="submit"
-              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
+            <Button type="submit" className="w-full">
               Update Password
-            </button>
+            </Button>
           </form>
-        </div>
+        </Card>
       </div>
-    </div>
+    </Card>
   );
 }

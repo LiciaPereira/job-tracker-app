@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { LoginForm } from "../components/LoginForm";
 import { SignUpForm } from "../components/SignUpForm";
+import { Card, Text } from "../components/ui";
+import { useTheme } from "../hooks/useTheme";
 
 export default function HomePage() {
   const [isLogin, setIsLogin] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
+  const { theme } = useTheme();
 
   const handleToggleForm = () => {
     setIsAnimating(true);
@@ -15,19 +18,23 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div
-        className={`bg-white rounded-lg shadow-xl p-8 w-full max-w-md transform transition-all duration-200 ${
+    <div
+      className={`min-h-screen ${theme.colors.background.page} flex items-center justify-center px-4 sm:px-6 lg:px-8`}
+    >
+      <Card
+        className={`p-8 w-full max-w-md transform transition-all duration-200 ${
           isAnimating ? "scale-95 opacity-50" : "scale-100 opacity-100"
         }`}
       >
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Job Tracker</h1>
-          <p className="text-gray-600">
+          <Text variant="h1" className="mb-2">
+            Job Tracker
+          </Text>
+          <Text variant="body">
             {isLogin
               ? "Track your job applications in one place"
               : "Create an account to get started"}
-          </p>
+          </Text>
         </div>
 
         <div
@@ -41,18 +48,18 @@ export default function HomePage() {
         </div>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+          <Text variant="small">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
             <button
               onClick={handleToggleForm}
-              className="text-indigo-600 hover:text-indigo-800 font-medium focus:outline-none focus:underline transition-colors duration-200"
+              className={`${theme.colors.primary.default} hover:underline font-medium focus:outline-none transition-colors duration-200`}
               disabled={isAnimating}
             >
               {isLogin ? "Sign Up" : "Login"}
             </button>
-          </p>
+          </Text>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

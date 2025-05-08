@@ -5,6 +5,7 @@ import { login } from "../services/authService";
 import { Alert } from "./Alert";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Input, Button, Text } from "./ui";
 
 interface LoginFormValues {
   email: string;
@@ -63,53 +64,27 @@ export function LoginForm() {
         />
       )}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            {...register("email")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="your@email.com"
-          />
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-          )}
-        </div>
+        <Input
+          id="email"
+          type="email"
+          label="Email"
+          {...register("email")}
+          placeholder="your@email.com"
+          error={errors.email?.message}
+        />
 
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            {...register("password")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Enter your password"
-          />
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-600">
-              {errors.password.message}
-            </p>
-          )}
-        </div>
+        <Input
+          id="password"
+          type="password"
+          label="Password"
+          {...register("password")}
+          placeholder="Enter your password"
+          error={errors.password?.message}
+        />
 
-        <button
-          type="submit"
-          className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
-            bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200`}
-        >
+        <Button type="submit" className="w-full">
           Login
-        </button>
+        </Button>
       </form>
     </div>
   );

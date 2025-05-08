@@ -11,6 +11,7 @@ import {
 import { useAuth } from "../hooks/useAuth";
 import { Alert } from "../components/Alert";
 import { useBlocker } from "../hooks/useBlocker";
+import { Card, Text, Input, Button, Select, TextArea } from "../components/ui";
 
 interface Job {
   id: string;
@@ -126,6 +127,14 @@ export default function JobDetailsPage() {
     }
   });
 
+  // define status options for the select component
+  const statusOptions = [
+    { value: "applied", label: "Applied" },
+    { value: "interviewing", label: "Interviewing" },
+    { value: "offered", label: "Offered" },
+    { value: "rejected", label: "Rejected" },
+  ];
+
   if (loading)
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -135,86 +144,23 @@ export default function JobDetailsPage() {
 
   if (!job)
     return (
-      <div className="max-w-2xl mx-auto p-6 text-center">
-        <h1 className="text-2xl font-bold text-gray-700">Job not found</h1>
-        <button
+      <Card className="max-w-2xl mx-auto text-center">
+        <Text variant="h1">Job not found</Text>
+        <Button
+          variant="secondary"
           onClick={() => navigate("/jobs")}
-          className="mt-4 text-indigo-600 hover:text-indigo-800"
+          className="mt-4"
         >
           Return to job list
-        </button>
-      </div>
+        </Button>
+      </Card>
     );
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Job Title
-          </label>
-          <input
-            {...register("title")}
-            className="w-full border p-2 rounded focus:ring-indigo-500 focus:border-indigo-500"
-          />
-          {errors.title && (
-            <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Company
-          </label>
-          <input
-            {...register("company")}
-            className="w-full border p-2 rounded focus:ring-indigo-500 focus:border-indigo-500"
-          />
-          {errors.company && (
-            <p className="mt-1 text-sm text-red-600">
-              {errors.company.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Status
-          </label>
-          <select
-            {...register("status")}
-            className="w-full border p-2 rounded focus:ring-indigo-500 focus:border-indigo-500"
-          >
-            <option value="applied">Applied</option>
-            <option value="interviewing">Interviewing</option>
-            <option value="offered">Offered</option>
-            <option value="rejected">Rejected</option>
-          </select>
-          {errors.status && (
-            <p className="mt-1 text-sm text-red-600">{errors.status.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Notes
-          </label>
-          <textarea
-            {...register("notes")}
-            rows={4}
-            className="w-full border p-2 rounded focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-
-        {isDirty && (
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition duration-150"
-          >
-            Save Changes
-          </button>
-        )}
-      </form>
+    <Card className="max-w-2xl mx-auto">
+      <Text variant="h1" className="mb-6">
+        Edit Job
+      </Text>
 
       {alert && (
         <Alert
@@ -224,14 +170,40 @@ export default function JobDetailsPage() {
         />
       )}
 
+      <form onSubmit={onSubmit} className="space-y-4">
+        <Input
+          label="Job Title"
+          {...register("title")}
+          error={errors.title?.message}
+        />
+
+        <Input
+          label="Company"
+          {...register("company")}
+          error={errors.company?.message}
+        />
+
+        <Select
+          label="Status"
+          options={statusOptions}
+          {...register("status")}
+          error={errors.status?.message}
+        />
+
+        <TextArea label="Notes" rows={4} {...register("notes")} />
+
+        {isDirty && (
+          <Button type="submit" className="w-full">
+            Save Changes
+          </Button>
+        )}
+      </form>
+
       <div className="flex gap-4 mt-6">
-        <button
-          onClick={handleDelete}
-          className="flex-1 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition duration-150"
-        >
+        <Button variant="danger" onClick={handleDelete} className="flex-1">
           Delete Job
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }

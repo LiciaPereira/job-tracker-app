@@ -3,6 +3,8 @@ import { useAuth } from "../hooks/useAuth";
 import { getJobsByUser } from "../features/jobs/services/getJobByUser";
 import { SummaryCards } from "../features/jobs/SummaryCards";
 import { RemindersPanel } from "../features/jobs/RemindersPanel";
+import { Card, Text } from "../components/ui";
+import { useTheme } from "../hooks/useTheme";
 
 interface Stats {
   total: number;
@@ -13,6 +15,7 @@ interface Stats {
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
+  const { theme } = useTheme();
   const [stats, setStats] = useState<Stats>({
     total: 0,
     interviews: 0,
@@ -42,10 +45,12 @@ export default function DashboardPage() {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="p-6">
-      <h1 className="text-2x1 font-bold mb-6">Your Dashboard</h1>
+    <Card className="p-6 rounded-lg">
+      <Text variant="h1" className="mb-6">
+        Your Dashboard
+      </Text>
       <SummaryCards stats={stats} />
       <RemindersPanel />
-    </div>
+    </Card>
   );
 }

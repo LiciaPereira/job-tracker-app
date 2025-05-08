@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { Input, Button } from "./ui";
 
 interface SignUpFormValues {
   firstName: string;
@@ -100,88 +101,46 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              First Name
-            </label>
-            <input
+            <Input
+              label="First Name"
               {...register("firstName")}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              error={errors.firstName?.message}
             />
-            {errors.firstName && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.firstName.message}
-              </p>
-            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Last Name
-            </label>
-            <input
+            <Input
+              label="Last Name"
               {...register("lastName")}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              error={errors.lastName?.message}
             />
-            {errors.lastName && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.lastName.message}
-              </p>
-            )}
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
-          <input
-            {...register("email")}
-            type="email"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          />
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-          )}
-        </div>
+        <Input
+          label="Email"
+          type="email"
+          {...register("email")}
+          error={errors.email?.message}
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Password
-          </label>
-          <input
-            {...register("password")}
-            type="password"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          />
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-600">
-              {errors.password.message}
-            </p>
-          )}
-        </div>
+        <Input
+          label="Password"
+          type="password"
+          {...register("password")}
+          error={errors.password?.message}
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Confirm Password
-          </label>
-          <input
-            {...register("confirmPassword")}
-            type="password"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          />
-          {errors.confirmPassword && (
-            <p className="mt-1 text-sm text-red-600">
-              {errors.confirmPassword.message}
-            </p>
-          )}
-        </div>
+        <Input
+          label="Confirm Password"
+          type="password"
+          {...register("confirmPassword")}
+          error={errors.confirmPassword?.message}
+        />
 
-        <button
-          type="submit"
-          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
+        <Button type="submit" className="w-full">
           Sign Up
-        </button>
+        </Button>
       </form>
     </div>
   );

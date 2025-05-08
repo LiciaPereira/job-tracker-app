@@ -1,11 +1,12 @@
-import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { addJob } from "../features/jobs/services/addJob";
 import { useAuth } from "../hooks/useAuth";
 import { Alert } from "../components/Alert";
-import { useState } from "react";
+import { Card, Text, Input, Button, Select, TextArea } from "../components/ui";
 
 interface FormValues {
   company: string;
@@ -57,9 +58,19 @@ export default function AddJobPage() {
     }
   };
 
+  const statusOptions = [
+    { value: "", label: "Select..." },
+    { value: "applied", label: "Applied" },
+    { value: "interviewing", label: "Interviewing" },
+    { value: "offered", label: "Offered" },
+    { value: "rejected", label: "Rejected" },
+  ];
+
   return (
-    <div className="max-w-md mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Add Job</h1>
+    <Card className="max-w-md mx-auto">
+      <Text variant="h1" className="mb-4">
+        Add Job
+      </Text>
 
       {alert && (
         <Alert
@@ -70,58 +81,37 @@ export default function AddJobPage() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label className="block mb-1">Company</label>
-          <input
-            {...register("company")}
-            className="w-full border p-2 rounded"
-          />
-          <p className="text-red-500 text-sm">{errors.company?.message}</p>
-        </div>
+        <Input
+          label="Company"
+          {...register("company")}
+          error={errors.company?.message}
+        />
 
-        <div>
-          <label className="block mb-1">Job Title</label>
-          <input {...register("title")} className="w-full border p-2 rounded" />
-          <p className="text-red-500 text-sm">{errors.title?.message}</p>
-        </div>
+        <Input
+          label="Job Title"
+          {...register("title")}
+          error={errors.title?.message}
+        />
 
-        <div>
-          <label className="block mb-1">Status</label>
-          <select {...register("status")} className="w-full border p-2 rounded">
-            <option value="">Select...</option>
-            <option value="applied">Applied</option>
-            <option value="interviewing">Interviewing</option>
-            <option value="offered">Offered</option>
-            <option value="rejected">Rejected</option>
-          </select>
-          <p className="text-red-500 text-sm">{errors.status?.message}</p>
-        </div>
+        <Select
+          label="Status"
+          options={statusOptions}
+          {...register("status")}
+          error={errors.status?.message}
+        />
 
-        <div>
-          <label className="block mb-1">Application Date</label>
-          <input
-            type="date"
-            {...register("appliedAt")}
-            className="w-full border p-2 rounded"
-          />
-        </div>
+        <Input
+          label="Application Date"
+          type="date"
+          {...register("appliedAt")}
+        />
 
-        <div>
-          <label className="block mb-1">Notes</label>
-          <textarea
-            {...register("notes")}
-            rows={4}
-            className="w-full border p-2 rounded"
-          />
-        </div>
+        <TextArea label="Notes" rows={4} {...register("notes")} />
 
-        <button
-          type="submit"
-          className="w-full bg-indigo-600 text-white p-2 rounded"
-        >
+        <Button type="submit" className="w-full">
           Add Job
-        </button>
+        </Button>
       </form>
-    </div>
+    </Card>
   );
 }

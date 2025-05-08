@@ -1,9 +1,12 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { logout } from "../services/authService";
+import { Button, Text } from "./ui";
+import { useTheme } from "../hooks/useTheme";
 
 export function Navbar() {
   const { user } = useAuth();
+  const { darkMode, toggleDarkMode, theme } = useTheme();
 
   //handle user logout and clear session
   const handleLogout = async () => {
@@ -15,14 +18,16 @@ export function Navbar() {
   };
 
   return (
-    <nav className="bg-white shadow-md fixed w-full z-10 top-0">
+    <nav
+      className={`shadow-md fixed w-full z-10 top-0 ${theme.colors.background.card}`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link
                 to="/dashboard"
-                className="text-xl font-bold text-indigo-600"
+                className={`text-xl font-bold ${theme.colors.primary.default}`}
               >
                 JobTracker
               </Link>
@@ -31,42 +36,49 @@ export function Navbar() {
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
                 to="/dashboard"
-                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                className={`border-transparent ${theme.colors.text.body} hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Dashboard
               </Link>
               <Link
                 to="/jobs"
-                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                className={`border-transparent ${theme.colors.text.body} hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Jobs
               </Link>
               <Link
                 to="/add-job"
-                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                className={`border-transparent ${theme.colors.text.body} hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Add Job
               </Link>
             </div>
           </div>
           {/* user profile section */}
-          <div className="flex items-center">
-            <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
-              <span className="text-sm text-gray-700">
+          <div className="flex">
+            <div className="hidden sm:ml-6 sm:flex sm:space-x-4">
+              <Text variant="body" className="text-sm content-center">
                 {user?.displayName || user?.email}
-              </span>
+              </Text>
+              <button
+                onClick={toggleDarkMode}
+                className={`${theme.colors.text.body} hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium`}
+                aria-label="Toggle dark mode"
+                style={{
+                  filter: "drop-shadow(0px 0px 7px #ffc800)", //add a nice shadow to shine the celestial objects!
+                }}
+              >
+                {darkMode ? "🌙" : "🌞"}
+              </button>
               <Link
                 to="/settings"
-                className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+                className={`border-transparent ${theme.colors.text.body} hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Settings
               </Link>
-              <button
-                onClick={handleLogout}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
+              <Button onClick={handleLogout} size="sm" className="m-auto ml-4">
                 Logout
-              </button>
+              </Button>
             </div>
           </div>
         </div>

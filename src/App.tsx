@@ -6,24 +6,7 @@ import AddJobPage from "./pages/AddJobPage";
 import JobListPage from "./pages/JobListPage";
 import JobDetailsPage from "./pages/JobDetailsPage";
 import SettingsPage from "./pages/SettingsPage";
-import { Navbar } from "./components/Navbar";
-import { useAuth } from "./hooks/useAuth";
-
-function Layout({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
-  return (
-    <div>
-      {user && <Navbar />}
-      <main
-        className={`min-h-screen bg-gradient-to-br from-indigo-50 to-white ${
-          user ? "pt-16" : ""
-        }`}
-      >
-        {children}
-      </main>
-    </div>
-  );
-}
+import { Layout } from "./components/Layout";
 
 function App() {
   return (
