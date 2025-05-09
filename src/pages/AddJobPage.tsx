@@ -6,7 +6,15 @@ import * as yup from "yup";
 import { addJob } from "../features/jobs/services/addJob";
 import { useAuth } from "../hooks/useAuth";
 import { Alert } from "../components/Alert";
-import { Card, Text, Input, Button, Select, TextArea } from "../components/ui";
+import {
+  Card,
+  Text,
+  Input,
+  Button,
+  Select,
+  TextArea,
+  UploadButton,
+} from "../components/ui";
 
 interface FormValues {
   company: string;
@@ -27,6 +35,12 @@ const schema = yup.object().shape({
   notes: yup.string().nullable().optional(),
 }) as yup.ObjectSchema<FormValues>;
 
+interface UploadResponse {
+  url: string;
+  name: string;
+  size: number;
+}
+
 export default function AddJobPage() {
   const {
     register,
@@ -42,6 +56,10 @@ export default function AddJobPage() {
     message: string;
   } | null>(null);
 
+  //files
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [coverLetterUrl, setCoverLetterUrl] = useState<string | null>(null);
+
   const onSubmit = async (data: FormValues) => {
     if (!user) return;
     try {
@@ -49,6 +67,8 @@ export default function AddJobPage() {
         ...data,
         appliedAt: data.appliedAt || undefined,
         notes: data.notes === null ? undefined : data.notes,
+        resumeUrl,
+        coverLetterUrl,
       };
       await addJob(user.uid, formattedData);
       setAlert({ type: "success", message: "Job added!" });
@@ -108,6 +128,17 @@ export default function AddJobPage() {
         />
 
         <TextArea label="Notes" rows={4} {...register("notes")} />
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Resume (PDF)
+          </label>
+          <UploadButton
+            endpoint="resumeUploader"
+            label="Upload Resume"
+            onUploadComplete={(url) => setResumeUrl(url)}
+          />
+        </div>
 
         <Button type="submit" className="w-full">
           Add Job

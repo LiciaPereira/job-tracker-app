@@ -9,6 +9,8 @@ interface JobData {
   status: "applied" | "interviewing" | "offered" | "rejected";
   appliedAt?: Date;
   notes?: string;
+  resumeUrl?: string | null;
+  coverLetterUrl?: string | null;
 }
 
 export async function addJob(userId: string, job: JobData) {
