@@ -8,7 +8,7 @@ export const { uploadFiles } = genUploader();
 const UploadDropzone = generateUploadDropzone();
 
 export interface DropzoneRef {
-  uploadManually: () => Promise<void>;
+  uploadManually: () => Promise<string | undefined>;
 }
 
 interface Props {
@@ -18,10 +18,14 @@ interface Props {
   variant?: "default" | "subtle";
 }
 
-export const Dropzone = forwardRef<DropzoneRef, Props>(
-  (
-    { endpoint, onUploadComplete, label = "Upload File", variant = "default" },
-    ref
+const InnerDropzone = (
+  {
+    endpoint,
+    onUploadComplete,
+    label = "Upload File",
+    variant = "default",
+  }: Props,
+  ref: ForwardedRef<DropzoneRef>
   ) => {
     const [file, setFile] = useState<File | null>(null);
     const [alert, setAlert] = useState<{
@@ -46,7 +50,7 @@ export const Dropzone = forwardRef<DropzoneRef, Props>(
 
     //expose uploadManually() to parent via ref
     useImperativeHandle(ref, () => ({
-      async uploadManually() {
+    async uploadManually(): Promise<string | undefined> {
         if (!file) return;
         try {
           const res = await uploadFiles(endpoint, { files: [file] });
@@ -58,6 +62,7 @@ export const Dropzone = forwardRef<DropzoneRef, Props>(
               type: "success",
               message: "File uploaded successfully!",
             });
+return url;
           }
         } catch (err: any) {
           setAlert({
@@ -91,5 +96,5 @@ export const Dropzone = forwardRef<DropzoneRef, Props>(
         />
       </div>
     );
-  }
-);
+};
+export const Dropzone = forwardRef(InnerDropzone);

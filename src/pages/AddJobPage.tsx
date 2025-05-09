@@ -52,13 +52,14 @@ export default function AddJobPage() {
   } | null>(null);
 
   //files
-  const uploadRef = useRef<{ uploadManually: () => Promise<void> }>(null);
+  const uploadRef = useRef<DropzoneRef>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
-
-  const dropzoneRef = useRef<DropzoneRef>(null);
 
   const onSubmit = async (data: FormValues) => {
     if (!user) return;
+
+    const uploadedUrl = await uploadRef.current?.uploadManually();
+
     try {
       if (uploadRef.current) {
         await uploadRef.current.uploadManually();
@@ -68,7 +69,7 @@ export default function AddJobPage() {
         ...data,
         appliedAt: data.appliedAt || undefined,
         notes: data.notes === null ? undefined : data.notes,
-        resumeUrl,
+        resumeUrl: uploadedUrl || null,
       };
       await addJob(user.uid, formattedData);
       setAlert({ type: "success", message: "Job added!" });
@@ -133,7 +134,7 @@ export default function AddJobPage() {
             Resume
           </label>
           <Dropzone
-            ref={dropzoneRef}
+            ref={uploadRef}
             endpoint="resumeUploader"
             label="Drag & drop your resume (PDF)"
             variant="default" // or "subtle"?
