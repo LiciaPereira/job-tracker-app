@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -13,7 +13,8 @@ import {
   Button,
   Select,
   TextArea,
-  UploadButton,
+  Dropzone,
+  DropzoneRef,
 } from "../components/ui";
 
 interface FormValues {
@@ -35,12 +36,6 @@ const schema = yup.object().shape({
   notes: yup.string().nullable().optional(),
 }) as yup.ObjectSchema<FormValues>;
 
-interface UploadResponse {
-  url: string;
-  name: string;
-  size: number;
-}
-
 export default function AddJobPage() {
   const {
     register,
@@ -57,29 +52,33 @@ export default function AddJobPage() {
   } | null>(null);
 
   //files
+  const uploadRef = useRef<{ uploadManually: () => Promise<void> }>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
-  const [coverLetterUrl, setCoverLetterUrl] = useState<string | null>(null);
+
+  const dropzoneRef = useRef<DropzoneRef>(null);
 
   const onSubmit = async (data: FormValues) => {
     if (!user) return;
     try {
+      if (uploadRef.current) {
+        await uploadRef.current.uploadManually();
+      }
+
       const formattedData = {
         ...data,
         appliedAt: data.appliedAt || undefined,
         notes: data.notes === null ? undefined : data.notes,
         resumeUrl,
-        coverLetterUrl,
       };
       await addJob(user.uid, formattedData);
       setAlert({ type: "success", message: "Job added!" });
-      setTimeout(() => navigate("/dashboard"), 2000);
+      setTimeout(() => navigate("/jobs"), 2000);
     } catch (err: any) {
       setAlert({ type: "error", message: err.message });
     }
   };
 
   const statusOptions = [
-    { value: "", label: "Select..." },
     { value: "applied", label: "Applied" },
     { value: "interviewing", label: "Interviewing" },
     { value: "offered", label: "Offered" },
@@ -131,12 +130,17 @@ export default function AddJobPage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Resume (PDF)
+            Resume
           </label>
-          <UploadButton
+          <Dropzone
+            ref={dropzoneRef}
             endpoint="resumeUploader"
-            label="Upload Resume"
-            onUploadComplete={(url) => setResumeUrl(url)}
+            label="Drag & drop your resume (PDF)"
+            variant="default" // or "subtle"?
+            onUploadComplete={(url) => {
+              console.log("Uploading job with resumeUrl:", resumeUrl);
+              setResumeUrl(url);
+            }}
           />
         </div>
 

@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -11,7 +11,16 @@ import {
 import { useAuth } from "../hooks/useAuth";
 import { Alert } from "../components/Alert";
 import { useBlocker } from "../hooks/useBlocker";
-import { Card, Text, Input, Button, Select, TextArea } from "../components/ui";
+import {
+  Card,
+  Text,
+  Input,
+  Button,
+  Select,
+  TextArea,
+  Dropzone,
+  DropzoneRef,
+} from "../components/ui";
 
 interface Job {
   id: string;
@@ -21,6 +30,7 @@ interface Job {
   appliedAt?: Date;
   notes?: string;
   userId: string;
+  resumeUrl?: string;
 }
 
 interface FormValues {
@@ -28,6 +38,7 @@ interface FormValues {
   title: string;
   status: "applied" | "interviewing" | "offered" | "rejected";
   notes: string;
+  resumeUrl: string;
 }
 
 const schema = yup.object().shape({
@@ -60,6 +71,11 @@ export default function JobDetailsPage() {
     resolver: yupResolver(schema),
   });
 
+  //store uploaded resume URL
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  //ref to trigger manual upload on save
+  const resumeRef = useRef<DropzoneRef>(null);
+
   // fetch job details
   useEffect(() => {
     if (!user || !jobId) return;
@@ -74,6 +90,8 @@ export default function JobDetailsPage() {
           status: data.status,
           notes: data.notes || "",
         });
+        //set resume if it exists
+        setResumeUrl(data.resumeUrl || null);
       } catch (err: any) {
         setAlert({ type: "error", message: err.message });
       } finally {
@@ -114,14 +132,22 @@ export default function JobDetailsPage() {
     if (!jobId || !user) return;
 
     try {
+      //upload resume if needed
+      if (resumeRef.current) {
+        await resumeRef.current.uploadManually();
+      }
+      console.log("Uploading job with resumeUrl:", resumeUrl);
       await updateJob(jobId, user.uid, {
         company: data.company,
         title: data.title,
         status: data.status,
         notes: data.notes,
+        resumeUrl: resumeUrl || null, //save resume
       });
+
       setAlert({ type: "success", message: "Changes saved!" });
       reset(data);
+      setResumeUrl(resumeUrl);
     } catch (err: any) {
       setAlert({ type: "error", message: err.message });
     }
@@ -191,6 +217,41 @@ export default function JobDetailsPage() {
         />
 
         <TextArea label="Notes" rows={4} {...register("notes")} />
+
+        {resumeUrl && (
+          <div className="mt-6">
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Resume:
+            </p>
+            <a
+              href={resumeUrl || job.resumeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline text-sm"
+            >
+              View Current Resume
+            </a>
+            <button
+              onClick={() => {
+                setResumeUrl(null); //remove resume
+              }}
+              className="text-red-600 text-sm ml-4 hover:underline"
+            >
+              Delete Resume
+            </button>
+          </div>
+        )}
+
+        {/* dropzone to upload or replace resume */}
+        <Dropzone
+          ref={resumeRef}
+          endpoint="resumeUploader"
+          label={job.resumeUrl ? "Replace Resume" : "Upload Resume"}
+          variant="default"
+          onUploadComplete={(url) => {
+            setResumeUrl(url); //save uploaded file
+          }}
+        />
 
         {isDirty && (
           <Button type="submit" className="w-full">
