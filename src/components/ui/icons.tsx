@@ -51,3 +51,14 @@ export const InfoIcon: React.FC<IconProps> = ({ className = "h-4 w-4" }) => (
     />
   </svg>
 );
+
+export const PaperclipIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M16.5 12.75V7.5a4.5 4.5 0 00-9 0v9a3 3 0 006 0v-6.75"
+    />
+  </svg>
+);

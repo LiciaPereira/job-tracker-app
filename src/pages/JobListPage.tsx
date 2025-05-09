@@ -3,8 +3,9 @@ import { useAuth } from "../hooks/useAuth";
 import { getJobsByUser } from "../features/jobs/services/getJobByUser";
 import { Link } from "react-router-dom";
 import { exportToCSV } from "../utils/csvExport";
-import { Card, Text, Button, Select } from "../components/ui";
+import { Card, Text, Button } from "../components/ui";
 import { useTheme } from "../hooks/useTheme";
+import { PaperclipIcon } from "../components/ui/icons";
 
 interface Job {
   id: string;
@@ -13,6 +14,7 @@ interface Job {
   status: string;
   appliedAt?: any;
   notes?: string;
+  resumeUrl?: string;
 }
 
 export default function JobListPage() {
@@ -128,6 +130,9 @@ export default function JobListPage() {
               className={`border ${theme.colors.border} p-4 rounded ${theme.colors.background.card} hover:shadow transition`}
             >
               <Text variant="h3">{job.title}</Text>
+              {job.resumeUrl && (
+                <PaperclipIcon className="w-5 h-5 text-gray-500" />
+              )}
               <Text variant="small">{job.company}</Text>
               <p className="text-sm mt-1 text-gray-700 dark:text-gray-300">
                 Status: <span className="font-medium">{job.status}</span>

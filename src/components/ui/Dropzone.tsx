@@ -1,6 +1,6 @@
 import { generateUploadDropzone } from "@uploadthing/react";
 import { genUploader } from "uploadthing/client";
-import { useImperativeHandle, useState, forwardRef } from "react";
+import { useImperativeHandle, useState, forwardRef, ForwardedRef } from "react";
 import { Alert } from "../Alert";
 
 //initialize upload client and dropzone component
