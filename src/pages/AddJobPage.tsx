@@ -111,116 +111,210 @@ export default function AddJobPage() {
     { value: "offered", label: "Offered" },
     { value: "rejected", label: "Rejected" },
   ];
-
   return (
-    <Card className="max-w-md mx-auto">
-      <Text variant="h1" className="mb-4">
-        Add Job
-      </Text>
-
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <Text variant="h1" className="mb-2">
+          Add New Job
+        </Text>
+        <Text variant="body" color="primary">
+          Track your job application details and documents
+        </Text>
+      </div>{" "}
       {alert && (
-        <Alert
-          type={alert.type}
-          message={alert.message}
-          onClose={() => setAlert(null)}
-        />
+        <div className="mb-6">
+          <Alert
+            type={alert.type}
+            message={alert.message}
+            onClose={() => setAlert(null)}
+          />
+        </div>
       )}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column - Job Details */}
+          <Card elevated className="p-6">
+            <Text variant="h2" className="mb-6">
+              Job Details
+            </Text>
+            <div className="space-y-4">
+              <Input
+                label="Company"
+                {...register("company")}
+                error={errors.company?.message}
+                required
+              />
+              <Input
+                label="Job Title"
+                {...register("title")}
+                error={errors.title?.message}
+                required
+              />
+              <Select
+                label="Status"
+                options={statusOptions}
+                {...register("status")}
+                error={errors.status?.message}
+                required
+              />
+              <Input
+                label="Application Date"
+                type="date"
+                {...register("appliedAt")}
+                defaultValue={new Date().toISOString().split("T")[0]}
+              />
+              <TextArea
+                label="Notes"
+                rows={4}
+                {...register("notes")}
+                helperText="Add any important details about the role or company"
+              />
+            </div>
+          </Card>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <Input
-          label="Company"
-          {...register("company")}
-          error={errors.company?.message}
-        />
-        <Input
-          label="Job Title"
-          {...register("title")}
-          error={errors.title?.message}
-        />
-        <Select
-          label="Status"
-          options={statusOptions}
-          {...register("status")}
-          error={errors.status?.message}
-        />
-        <Input
-          label="Application Date"
-          type="date"
-          {...register("appliedAt")}
-          defaultValue={new Date().toISOString().split("T")[0]}
-        />
-        <TextArea label="Notes" rows={4} {...register("notes")} />
+          {/* Right Column - Documents */}
+          <Card elevated className="p-6">
+            <Text variant="h2" className="mb-6">
+              Documents
+            </Text>
+            <div className="space-y-6">
+              {/* Resume Section */}
+              <div>
+                <Text variant="h3" className="mb-4">
+                  Resume
+                </Text>
+                <Dropzone
+                  ref={resumeRef}
+                  endpoint="resumeUploader"
+                  label="Drag & drop your resume (PDF)"
+                  variant="default"
+                  onUploadComplete={(url, name) => {
+                    setResumePreview({ url, name });
+                  }}
+                />
+                {resumePreview && (
+                  <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                    <div className="flex items-center space-x-2">
+                      <svg
+                        className="w-5 h-5 text-gray-500 group-hover:text-primary-500 transition-colors duration-200"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      <a
+                        href={resumePreview.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 rounded transition-colors duration-200"
+                      >
+                        {resumePreview.name}
+                      </a>
+                    </div>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => setResumePreview(null)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:opacity-100"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                )}
+              </div>
 
-        {/* Resume Upload */}
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Resume
-        </label>
-        <Dropzone
-          ref={resumeRef}
-          endpoint="resumeUploader"
-          label="Drag & drop your resume (PDF)"
-          variant="default"
-          onUploadComplete={(url, name) => {
-            setResumePreview({ url, name });
-          }}
-        />
-        {resumePreview && (
-          <div className="mt-2">
-            <a
-              href={resumePreview.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline text-sm"
-            >
-              {resumePreview.name}
-            </a>
-            <button
-              type="button"
-              onClick={() => setResumePreview(null)}
-              className="text-red-600 text-sm ml-4 hover:underline"
-            >
-              Delete
-            </button>
-          </div>
-        )}
+              {/* Cover Letter Section */}
+              <div>
+                <Text variant="h3" className="mb-4">
+                  Cover Letter
+                </Text>
+                <Dropzone
+                  ref={coverLetterRef}
+                  endpoint="coverLetterUploader"
+                  label="Drag & drop your cover letter (PDF)"
+                  variant="default"
+                  onUploadComplete={(url, name) => {
+                    setCoverLetterPreview({ url, name });
+                  }}
+                />
+                {coverLetterPreview && (
+                  <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                    <div className="flex items-center space-x-2">
+                      <svg
+                        className="w-5 h-5 text-gray-500 group-hover:text-primary-500 transition-colors duration-200"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      <a
+                        href={coverLetterPreview.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 rounded transition-colors duration-200"
+                      >
+                        {coverLetterPreview.name}
+                      </a>
+                    </div>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => setCoverLetterPreview(null)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:opacity-100"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        </div>
 
-        {/* Cover Letter Upload */}
-        <label className="block text-sm font-medium text-gray-700 mb-1 mt-4">
-          Cover Letter
-        </label>
-        <Dropzone
-          ref={coverLetterRef}
-          endpoint="coverLetterUploader"
-          label="Drag & drop your cover letter (PDF)"
-          variant="default"
-          onUploadComplete={(url, name) => {
-            setCoverLetterPreview({ url, name });
-          }}
-        />
-        {coverLetterPreview && (
-          <div className="mt-2">
-            <a
-              href={coverLetterPreview.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline text-sm"
-            >
-              {coverLetterPreview.name}
-            </a>
-            <button
-              type="button"
-              onClick={() => setCoverLetterPreview(null)}
-              className="text-red-600 text-sm ml-4 hover:underline"
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-        <Button type="submit" className="w-full">
-          Add Job
-        </Button>
+        {/* Submit Button - Full Width Below Grid */}
+        <div className="mt-8 flex justify-end gap-4">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => navigate("/jobs")}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            icon={
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            }
+          >
+            Add Job
+          </Button>
+        </div>
       </form>
-    </Card>
+    </div>
   );
 }

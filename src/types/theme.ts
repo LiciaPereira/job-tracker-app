@@ -11,6 +11,7 @@ export interface Theme {
       heading: string;
       muted: string;
       label: string;
+      link: string;
     };
     primary: {
       light: string;

@@ -11,7 +11,7 @@ interface SummaryCardsProps {
 
 export function SummaryCards({ stats }: SummaryCardsProps) {
   return (
-    <div className="flex flex-wrap justify-center gap-4">
+    <div className="flex flex-wrap justify-center gap-4 p-1">
       <StatCard label="Applications Sent" value={stats.total} />
       <StatCard
         label="Interviews"

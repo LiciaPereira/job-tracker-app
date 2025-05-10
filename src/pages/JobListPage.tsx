@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { getJobsByUser } from "../features/jobs/services/getJobByUser";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { exportToCSV } from "../utils/csvExport";
-import { Card, Text, Button } from "../components/ui";
+import { Card, Text, Button, Select } from "../components/ui";
 import { useTheme } from "../hooks/useTheme";
 import { PaperclipIcon } from "../components/ui/icons";
 
@@ -21,6 +21,7 @@ interface Job {
 export default function JobListPage() {
   const { user, loading } = useAuth();
   const { theme } = useTheme();
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filter, setFilter] = useState<string>("");
   const [isExporting, setIsExporting] = useState(false);
@@ -69,116 +70,231 @@ export default function JobListPage() {
     { value: "rejected", label: "Rejected" },
   ];
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <Card className="max-w-4xl mx-auto p-6 rounded-lg">
-      <div
-        className={`flex justify-between items-center mb-6 ${theme.colors.text.body}`}
-      >
-        <Text variant="h1">Your Job Applications</Text>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="space-y-6">
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <Text variant="h1" className="mb-2">
+              Job Applications
+            </Text>
+            <Text variant="body" color="primary">
+              {filteredJobs.length}{" "}
+              {filteredJobs.length === 1 ? "application" : "applications"} found
+            </Text>
+          </div>
 
-        {/* export button with loading state */}
-        <Button
-          onClick={handleExport}
-          disabled={isExporting || jobs.length === 0}
-          variant={jobs.length === 0 ? "secondary" : "primary"}
-          size="md"
-          className={isExporting ? "cursor-wait" : ""}
-        >
-          {isExporting ? (
-            <span className="flex items-center">
-              {/* spinning icon while exporting */}
+          <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3">
+            <Link to="/add-job">
+              <Button
+                variant="primary"
+                size="md"
+                icon={
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                }
+              >
+                Add New Job
+              </Button>
+            </Link>
+
+            <Button
+              onClick={handleExport}
+              disabled={isExporting || jobs.length === 0}
+              variant="outline"
+              size="md"
+              icon={
+                isExporting ? undefined : (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
+                  </svg>
+                )
+              }
+            >
+              {isExporting ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Exporting...
+                </span>
+              ) : (
+                "Export to CSV"
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Filters Section */}
+        <Card elevated className="p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1">
+              <Select
+                label="Filter by status"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                options={statusOptions}
+              />
+            </div>
+          </div>
+        </Card>
+
+        {/* Job List */}
+        {filteredJobs.length === 0 ? (
+          <Card elevated className="p-8 text-center">
+            <div className="flex flex-col items-center justify-center">
               <svg
-                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                xmlns="http://www.w3.org/2000/svg"
+                className="w-16 h-16 text-gray-400 mb-4"
                 fill="none"
                 viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
                 <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                />
               </svg>
-              Exporting...
-            </span>
-          ) : (
-            "Export to CSV"
-          )}
-        </Button>
-      </div>
-
-      {/* filter by job status */}
-      <div className="mb-4 flex items-center">
-        <Text variant="label" className="mr-2">
-          Filter by status:
-        </Text>
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className={theme.elements.input}
-        >
-          {statusOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* job list display */}
-      {filteredJobs.length === 0 ? (
-        <Text variant="small">No jobs found.</Text>
-      ) : (
-        <ul className="space-y-4">
-          {filteredJobs.map((job) => (
-            <li
-              key={job.id}
-              className={`border ${theme.colors.border} p-4 rounded ${theme.colors.background.card} hover:shadow transition`}
-            >
-              <Text variant="h3">{job.title}</Text>
-
-              {/* show resume icon if attached */}
-              {job.resume?.url && (
-                <PaperclipIcon
-                  className="w-5 h-5 text-gray-500"
-                  title="Resume attached"
-                />
-              )}
-
-              {/* show cover letter icon if attached */}
-              {job.coverLetter?.url && (
-                <PaperclipIcon
-                  className="w-5 h-5 text-green-500"
-                  title="Cover Letter attached"
-                />
-              )}
-
-              <Text variant="small">{job.company}</Text>
-              <p className="text-sm mt-1 text-gray-700 dark:text-gray-300">
-                Status: <span className="font-medium">{job.status}</span>
-              </p>
-
-              {/* view details link */}
-              <Link
-                to={`/job/${job.id}`}
-                className={`${theme.colors.primary.default} text-sm mt-2 inline-block`}
+              <Text variant="h3" className="mb-2">
+                No jobs found
+              </Text>
+              <Text variant="body" color="primary">
+                {filter ? "Try changing your filters or " : "Start by "}
+                <Link
+                  to="/add-job"
+                  className="text-primary-600 hover:text-primary-500"
+                >
+                  adding a new job application
+                </Link>
+              </Text>
+            </div>
+          </Card>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredJobs.map((job) => (
+              <Card
+                key={job.id}
+                interactive
+                elevated
+                className="group"
+                onClick={() => navigate(`/job/${job.id}`)}
               >
-                View details →
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Card>
+                <div className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <Text variant="h3" className="mb-1 truncate">
+                        {job.title}
+                      </Text>
+                      <Text variant="body" className="truncate">
+                        {job.company}
+                      </Text>
+                    </div>
+                    <div
+                      className={`
+                      px-2.5 py-1 rounded-full text-xs font-medium
+                      ${
+                        job.status === "offered"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                          : job.status === "rejected"
+                            ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                            : job.status === "interviewing"
+                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+                      }
+                    `}
+                    >
+                      {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex items-center space-x-2">
+                    {job.resume?.url && (
+                      <span
+                        title="Resume attached"
+                        className="flex items-center text-gray-500"
+                      >
+                        <PaperclipIcon className="w-4 h-4" />
+                      </span>
+                    )}
+                    {job.coverLetter?.url && (
+                      <span
+                        title="Cover Letter attached"
+                        className="flex items-center text-gray-500"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </span>
+                    )}
+                    {job.appliedAt && (
+                      <Text variant="small" className="text-gray-500">
+                        Applied {new Date(job.appliedAt).toLocaleDateString()}
+                      </Text>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

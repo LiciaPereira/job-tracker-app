@@ -48,11 +48,10 @@ export function RemindersPanel() {
       setAlert({ type: "error", message: "Failed to update reminder" });
     }
   };
-
   return (
-    <Card className="mt-8 p-4 rounded-lg shadow bg-gray-50 dark:bg-gray-700">
+    <>
       <Text variant="h3" className="mb-4">
-        Upcoming Follow-ups
+        Upcoming Follow-ups ({reminders.length})
       </Text>
 
       {alert && (
@@ -66,32 +65,34 @@ export function RemindersPanel() {
       {reminders.length === 0 ? (
         <Text variant="small">No upcoming follow-ups</Text>
       ) : (
-        <ul className="space-y-3">
-          {reminders.map((reminder) => (
-            <li
-              key={reminder.id}
-              className={`flex items-center justify-between p-3 ${theme.colors.background.card} rounded ${theme.colors.border}`}
-            >
-              <div>
-                <Link
-                  to={`/job/${reminder.jobId}`}
-                  className={`text-sm font-medium ${theme.colors.primary.default} hover:underline`}
-                >
-                  Follow up due {format(reminder.dueDate, "MMM d")}
-                </Link>
-              </div>
-              <Button
-                variant="success"
-                size="sm"
-                onClick={() => reminder.id && handleComplete(reminder.id)}
-                className="text-sm"
+        <div className="overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 h-[calc(100vh-20rem)]">
+          <ul className="space-y-3 pr-2">
+            {reminders.map((reminder) => (
+              <li
+                key={reminder.id}
+                className={`flex items-center justify-between p-3 ${theme.colors.background.card} rounded ${theme.colors.border}`}
               >
-                Mark as done
-              </Button>
-            </li>
-          ))}
-        </ul>
+                <div>
+                  <Link
+                    to={`/job/${reminder.jobId}`}
+                    className={`text-sm font-medium ${theme.colors.primary.default} hover:underline`}
+                  >
+                    Follow up due {format(reminder.dueDate, "MMM d")}
+                  </Link>
+                </div>
+                <Button
+                  variant="success"
+                  size="sm"
+                  onClick={() => reminder.id && handleComplete(reminder.id)}
+                  className="text-sm"
+                >
+                  Mark as done
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
-    </Card>
+    </>
   );
 }

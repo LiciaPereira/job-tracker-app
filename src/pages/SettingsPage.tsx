@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { updateEmail, updatePassword, updateProfile } from "firebase/auth";
+import { updatePassword, updateProfile } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { Alert } from "../components/Alert";
@@ -13,7 +13,6 @@ import { useTheme } from "../hooks/useTheme";
 interface ProfileFormValues {
   firstName: string;
   lastName: string;
-  email: string;
 }
 
 interface PasswordFormValues {
@@ -26,7 +25,6 @@ interface PasswordFormValues {
 const profileSchema = yup.object().shape({
   firstName: yup.string().required("First name is required"),
   lastName: yup.string().required("Last name is required"),
-  email: yup.string().email("Invalid email").required("Email is required"),
 });
 
 //validate password change form inputs
@@ -49,7 +47,6 @@ export default function SettingsPage() {
     type: "success" | "error";
     message: string;
   } | null>(null);
-
   //initialize profile form with user's current data
   const {
     register: registerProfile,
@@ -60,7 +57,6 @@ export default function SettingsPage() {
     defaultValues: {
       firstName: user?.displayName?.split(" ")[0] || "",
       lastName: user?.displayName?.split(" ")[1] || "",
-      email: user?.email || "",
     },
   });
 
@@ -73,7 +69,6 @@ export default function SettingsPage() {
   } = useForm<PasswordFormValues>({
     resolver: yupResolver(passwordSchema),
   });
-
   const onProfileSubmit = async (data: ProfileFormValues) => {
     try {
       if (!user) return;
@@ -84,17 +79,11 @@ export default function SettingsPage() {
         displayName: fullName,
       });
 
-      //update email if changed
-      if (data.email !== user.email) {
-        await updateEmail(user, data.email);
-      }
-
       //sync changes with firestore
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
         firstName: data.firstName,
         lastName: data.lastName,
-        email: data.email,
       });
 
       setAlert({
@@ -129,100 +118,185 @@ export default function SettingsPage() {
   };
 
   return (
-    <Card className="max-w-2xl mx-auto p-6 rounded-lg">
-      <Text variant="h1" className="mb-6">
-        Settings
-      </Text>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <Text variant="h1" className="mb-2">
+          Account Settings
+        </Text>
+        <Text variant="body" className="text-gray-600 dark:text-gray-400">
+          Manage your profile and account preferences
+        </Text>
+      </div>
 
       {alert && (
-        <Alert
-          type={alert.type}
-          message={alert.message}
-          onClose={() => setAlert(null)}
-        />
+        <div className="mb-6">
+          <Alert
+            type={alert.type}
+            message={alert.message}
+            onClose={() => setAlert(null)}
+          />
+        </div>
       )}
 
-      <div className="space-y-8">
-        <Card
-          className={`${theme.colors.background.card} p-6 rounded-lg shadow`}
-        >
-          <Text variant="h2" className="mb-4">
-            Profile Settings
+      <div className="grid gap-8">
+        {/* Read-only Email Display */}
+        <Card elevated className="p-6">
+          <Text variant="h3" className="mb-4">
+            Account Email
+          </Text>
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 flex items-center justify-between">
+            <div>
+              <Text
+                variant="small"
+                className="text-gray-600 dark:text-gray-400 mb-1"
+              >
+                Email Address
+              </Text>
+              <Text
+                variant="body"
+                className="font-medium text-gray-900 dark:text-white"
+              >
+                {user?.email}
+              </Text>
+            </div>
+            <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-400">
+              <svg
+                className="w-4 h-4 mr-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              Verified
+            </div>
+          </div>
+        </Card>
+
+        {/* Profile Settings */}
+        <Card elevated className="p-6">
+          <Text variant="h2" className="mb-6">
+            Profile Information
           </Text>
           <form
             onSubmit={handleProfileSubmit(onProfileSubmit)}
-            className="space-y-4"
+            className="space-y-6"
           >
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Input
-                  label="First Name"
-                  {...registerProfile("firstName")}
-                  error={profileErrors.firstName?.message}
-                />
-              </div>
-              <div>
-                <Input
-                  label="Last Name"
-                  {...registerProfile("lastName")}
-                  error={profileErrors.lastName?.message}
-                />
-              </div>
-            </div>
-            <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Input
-                label="Email"
-                type="email"
-                {...registerProfile("email")}
-                error={profileErrors.email?.message}
+                label="First Name"
+                {...registerProfile("firstName")}
+                error={profileErrors.firstName?.message}
+                placeholder="Enter your first name"
+                required
+              />
+              <Input
+                label="Last Name"
+                {...registerProfile("lastName")}
+                error={profileErrors.lastName?.message}
+                placeholder="Enter your last name"
+                required
               />
             </div>
-            <Button type="submit" className="w-full">
-              Update Profile
-            </Button>
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                variant="primary"
+                icon={
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                }
+              >
+                Save Changes
+              </Button>
+            </div>
           </form>
         </Card>
 
-        <Card
-          className={`${theme.colors.background.card} p-6 rounded-lg shadow`}
-        >
-          <Text variant="h2" className="mb-4">
-            Change Password
+        {/* Password Settings */}
+        <Card elevated className="p-6">
+          <Text variant="h2" className="mb-6">
+            Security
           </Text>
           <form
             onSubmit={handlePasswordSubmit(onPasswordSubmit)}
-            className="space-y-4"
+            className="space-y-6"
           >
-            <div>
-              <Input
-                label="Current Password"
-                type="password"
-                {...registerPassword("currentPassword")}
-                error={passwordErrors.currentPassword?.message}
-              />
-            </div>
-            <div>
+            <Input
+              label="Current Password"
+              type="password"
+              {...registerPassword("currentPassword")}
+              error={passwordErrors.currentPassword?.message}
+              placeholder="Enter your current password"
+              required
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Input
                 label="New Password"
                 type="password"
                 {...registerPassword("newPassword")}
                 error={passwordErrors.newPassword?.message}
+                placeholder="Enter new password"
+                required
               />
-            </div>
-            <div>
               <Input
                 label="Confirm New Password"
                 type="password"
                 {...registerPassword("confirmPassword")}
                 error={passwordErrors.confirmPassword?.message}
+                placeholder="Confirm new password"
+                required
               />
             </div>
-            <Button type="submit" className="w-full">
-              Update Password
-            </Button>
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => resetPassword()}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                icon={
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+                    />
+                  </svg>
+                }
+              >
+                Update Password
+              </Button>
+            </div>
           </form>
         </Card>
       </div>
-    </Card>
+    </div>
   );
 }
