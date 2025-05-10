@@ -16,6 +16,7 @@ interface Props {
   onUploadComplete: (url: string) => void;
   label?: string;
   variant?: "default" | "subtle";
+  onFileSelected?: () => void;
 }
 
 const InnerDropzone = (
@@ -24,6 +25,7 @@ const InnerDropzone = (
     onUploadComplete,
     label = "Upload File",
     variant = "default",
+    onFileSelected,
   }: Props,
   ref: ForwardedRef<DropzoneRef>
   ) => {
@@ -85,7 +87,14 @@ return url;
         <UploadDropzone
           endpoint={endpoint}
           config={{ mode: "manual" }}
-          onChange={(files) => setFile(files?.[0] || null)}
+        onChange={(files) => {
+          console.log("Files selected:", files);
+          const selected = files?.[0] || null;
+          setFile(selected);
+          if (selected && onFileSelected) {
+            onFileSelected();
+          }
+        }}
           appearance={{
             container: getContainerClasses(),
             label: "text-sm font-medium",

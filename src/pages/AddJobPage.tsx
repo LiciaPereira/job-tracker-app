@@ -23,6 +23,8 @@ interface FormValues {
   status: "applied" | "interviewing" | "offered" | "rejected";
   appliedAt?: Date | null;
   notes?: string;
+  resumeUrl?: string;
+  coverLetterUrl?: string;
 }
 
 const schema = yup.object().shape({
@@ -52,24 +54,29 @@ export default function AddJobPage() {
   } | null>(null);
 
   //files
-  const uploadRef = useRef<DropzoneRef>(null);
+  const resumeRef = useRef<DropzoneRef>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const coverLetterRef = useRef<DropzoneRef>(null);
+  const [coverLetterUrl, setCoverLetterUrl] = useState<string | null>(null);
 
   const onSubmit = async (data: FormValues) => {
     if (!user) return;
 
-    const uploadedUrl = await uploadRef.current?.uploadManually();
+    const uploadedResumeUrl = await resumeRef.current?.uploadManually();
+    const uploadedCoverLetterUrl =
+      await coverLetterRef.current?.uploadManually();
 
     try {
-      if (uploadRef.current) {
-        await uploadRef.current.uploadManually();
+      if (resumeRef.current) {
+        await resumeRef.current.uploadManually();
       }
 
       const formattedData = {
         ...data,
         appliedAt: data.appliedAt || undefined,
         notes: data.notes === null ? undefined : data.notes,
-        resumeUrl: uploadedUrl || null,
+        resumeUrl: uploadedResumeUrl || null,
+        coverLetterUrl: uploadedCoverLetterUrl || null,
       };
       await addJob(user.uid, formattedData);
       setAlert({ type: "success", message: "Job added!" });
@@ -134,13 +141,25 @@ export default function AddJobPage() {
             Resume
           </label>
           <Dropzone
-            ref={uploadRef}
+            ref={resumeRef}
             endpoint="resumeUploader"
             label="Drag & drop your resume (PDF)"
             variant="default" // or "subtle"?
             onUploadComplete={(url) => {
-              console.log("Uploading job with resumeUrl:", resumeUrl);
+              console.log("Uploading job with url:", url);
               setResumeUrl(url);
+            }}
+          />
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Cover Letter
+          </label>
+          <Dropzone
+            ref={coverLetterRef}
+            endpoint="coverLetterUploader"
+            label="Drag & drop your cover letter (PDF)"
+            variant="default"
+            onUploadComplete={(url) => {
+              setCoverLetterUrl(url);
             }}
           />
         </div>

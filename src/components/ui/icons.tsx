@@ -52,8 +52,18 @@ export const InfoIcon: React.FC<IconProps> = ({ className = "h-4 w-4" }) => (
   </svg>
 );
 
-export const PaperclipIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}>
+export const PaperclipIcon = ({
+  title,
+  ...props
+}: React.SVGProps<SVGSVGElement> & { title?: string }) => (
+  <svg
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    aria-hidden={title ? undefined : true}
+    {...props}
+  >
+    {title && <title>{title}</title>}
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
