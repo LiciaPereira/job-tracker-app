@@ -23,8 +23,8 @@ interface FormValues {
   status: "applied" | "interviewing" | "offered" | "rejected";
   appliedAt?: Date | null;
   notes?: string;
-  resumeUrl?: string;
-  coverLetterUrl?: string;
+  resume?: { url: string; name: string } | null;
+  coverLetter?: { url: string; name: string } | null;
 }
 
 const schema = yup.object().shape({
@@ -44,44 +44,63 @@ export default function AddJobPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: yupResolver(schema) as any,
+    resolver: yupResolver(schema),
   });
+
   const { user } = useAuth();
   const navigate = useNavigate();
+
   const [alert, setAlert] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
 
-  //files
   const resumeRef = useRef<DropzoneRef>(null);
-  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [resumePreview, setResumePreview] = useState<{
+    url: string;
+    name: string;
+  } | null>(null);
+
   const coverLetterRef = useRef<DropzoneRef>(null);
-  const [coverLetterUrl, setCoverLetterUrl] = useState<string | null>(null);
+  const [coverLetterPreview, setCoverLetterPreview] = useState<{
+    url: string;
+    name: string;
+  } | null>(null);
 
   const onSubmit = async (data: FormValues) => {
     if (!user) return;
 
-    const uploadedResumeUrl = await resumeRef.current?.uploadManually();
-    const uploadedCoverLetterUrl =
-      await coverLetterRef.current?.uploadManually();
-
     try {
-      if (resumeRef.current) {
-        await resumeRef.current.uploadManually();
-      }
+      const uploadedResume = await resumeRef.current?.uploadManually();
+      const uploadedCoverLetter =
+        await coverLetterRef.current?.uploadManually();
 
-      const formattedData = {
+      const resume = uploadedResume
+        ? {
+            url: uploadedResume,
+            name: resumePreview?.name || "Uploaded Resume",
+          }
+        : data.resume || null;
+
+      const coverLetter = uploadedCoverLetter
+        ? {
+            url: uploadedCoverLetter,
+            name: coverLetterPreview?.name || "Uploaded Cover Letter",
+          }
+        : data.coverLetter || null;
+
+      await addJob(user.uid, {
         ...data,
         appliedAt: data.appliedAt || undefined,
-        notes: data.notes === null ? undefined : data.notes,
-        resumeUrl: uploadedResumeUrl || null,
-        coverLetterUrl: uploadedCoverLetterUrl || null,
-      };
-      await addJob(user.uid, formattedData);
+        notes: data.notes ?? undefined,
+        resume,
+        coverLetter,
+      });
+
       setAlert({ type: "success", message: "Job added!" });
       setTimeout(() => navigate("/jobs"), 2000);
     } catch (err: any) {
+      console.error("Error adding job:", err);
       setAlert({ type: "error", message: err.message });
     }
   };
@@ -113,56 +132,90 @@ export default function AddJobPage() {
           {...register("company")}
           error={errors.company?.message}
         />
-
         <Input
           label="Job Title"
           {...register("title")}
           error={errors.title?.message}
         />
-
         <Select
           label="Status"
           options={statusOptions}
           {...register("status")}
           error={errors.status?.message}
         />
-
         <Input
           label="Application Date"
           type="date"
           {...register("appliedAt")}
           defaultValue={new Date().toISOString().split("T")[0]}
         />
-
         <TextArea label="Notes" rows={4} {...register("notes")} />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Resume
-          </label>
-          <Dropzone
-            ref={resumeRef}
-            endpoint="resumeUploader"
-            label="Drag & drop your resume (PDF)"
-            variant="default" // or "subtle"?
-            onUploadComplete={(url) => {
-              console.log("Uploading job with url:", url);
-              setResumeUrl(url);
-            }}
-          />
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Cover Letter
-          </label>
-          <Dropzone
-            ref={coverLetterRef}
-            endpoint="coverLetterUploader"
-            label="Drag & drop your cover letter (PDF)"
-            variant="default"
-            onUploadComplete={(url) => {
-              setCoverLetterUrl(url);
-            }}
-          />
-        </div>
+        {/* Resume Upload */}
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Resume
+        </label>
+        <Dropzone
+          ref={resumeRef}
+          endpoint="resumeUploader"
+          label="Drag & drop your resume (PDF)"
+          variant="default"
+          onUploadComplete={(url, name) => {
+            setResumePreview({ url, name });
+          }}
+        />
+        {resumePreview && (
+          <div className="mt-2">
+            <a
+              href={resumePreview.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline text-sm"
+            >
+              {resumePreview.name}
+            </a>
+            <button
+              type="button"
+              onClick={() => setResumePreview(null)}
+              className="text-red-600 text-sm ml-4 hover:underline"
+            >
+              Delete
+            </button>
+          </div>
+        )}
+
+        {/* Cover Letter Upload */}
+        <label className="block text-sm font-medium text-gray-700 mb-1 mt-4">
+          Cover Letter
+        </label>
+        <Dropzone
+          ref={coverLetterRef}
+          endpoint="coverLetterUploader"
+          label="Drag & drop your cover letter (PDF)"
+          variant="default"
+          onUploadComplete={(url, name) => {
+            setCoverLetterPreview({ url, name });
+          }}
+        />
+        {coverLetterPreview && (
+          <div className="mt-2">
+            <a
+              href={coverLetterPreview.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline text-sm"
+            >
+              {coverLetterPreview.name}
+            </a>
+            <button
+              type="button"
+              onClick={() => setCoverLetterPreview(null)}
+              className="text-red-600 text-sm ml-4 hover:underline"
+            >
+              Delete
+            </button>
+          </div>
+        )}
 
         <Button type="submit" className="w-full">
           Add Job

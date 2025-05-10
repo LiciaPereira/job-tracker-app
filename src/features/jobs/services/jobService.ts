@@ -20,7 +20,11 @@ export async function deleteJobById(jobId: string) {
 //update job and create reminder if status changes to applied
 export async function updateJob(jobId: string, userId: string, updates: any) {
   const ref = doc(db, "jobs", jobId);
-  await updateDoc(ref, updates);
+  await updateDoc(ref, {
+    ...updates,
+    resume: updates.resume ?? null,
+    coverLetter: updates.coverLetter ?? null,
+  });
 
   //create follow-up reminder if status changed to applied
   if (updates.status === "applied") {

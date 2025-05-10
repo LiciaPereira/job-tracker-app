@@ -30,8 +30,8 @@ interface Job {
   appliedAt?: Date;
   notes?: string;
   userId: string;
-  resumeUrl?: string;
-  coverLetterUrl?: string;
+  resume?: { url: string; name: string };
+  coverLetter?: { url: string; name: string };
 }
 
 interface FormValues {
@@ -69,53 +69,57 @@ export default function JobDetailsPage() {
     handleSubmit,
     formState: { isDirty, errors },
     reset,
-  } = useForm<FormValues>({
-    resolver: yupResolver(schema),
-  });
+  } = useForm<FormValues>({ resolver: yupResolver(schema) });
 
   //files
   const resumeRef = useRef<DropzoneRef>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [resumeName, setResumeName] = useState<string | null>(null);
   const coverLetterRef = useRef<DropzoneRef>(null);
   const [coverLetterUrl, setCoverLetterUrl] = useState<string | null>(null);
+  const [coverLetterName, setCoverLetterName] = useState<string | null>(null);
   const [isResumeChanged, setIsResumeChanged] = useState(false);
   const [isCoverLetterChanged, setIsCoverLetterChanged] = useState(false);
 
   // fetch job details
   useEffect(() => {
     if (!user || !jobId) return;
-
     const fetchJob = async () => {
       try {
+        console.log("Fetching job with ID:", jobId);
         const data = (await getJobById(jobId)) as Job;
+        console.log("Fetched job data:", data);
+
         setJob(data);
         reset({
           company: data.company,
           title: data.title,
           status: data.status,
           notes: data.notes || "",
-          resumeUrl: data.resumeUrl || "",
-          coverLetterUrl: data.coverLetterUrl || "",
+          resumeUrl: data.resume?.url || "",
+          coverLetterUrl: data.coverLetter?.url || "",
         });
-        //set resume if it exists
-        setResumeUrl(data.resumeUrl || null);
-        setCoverLetterUrl(data.coverLetterUrl || null);
+
+        setResumeUrl(data.resume?.url || null);
+        setResumeName(data.resume?.name || null);
+        setCoverLetterUrl(data.coverLetter?.url || null);
+        setCoverLetterName(data.coverLetter?.name || null);
+
+        console.log("State updated with job data");
       } catch (err: any) {
+        console.error("Error fetching job:", err);
         setAlert({ type: "error", message: err.message });
       } finally {
         setLoading(false);
       }
     };
-
     fetchJob();
   }, [user, jobId, reset]);
 
   useBlocker({
     when: isDirty,
     message: "You have unsaved changes. Are you sure you want to leave?",
-    onConfirm: () => {
-      // allow routing to continue (dirty flag will reset on unmount)
-    },
+    onConfirm: () => {},
     onCancel: () => {
       setAlert({
         type: "info",
@@ -127,7 +131,6 @@ export default function JobDetailsPage() {
   const handleDelete = async () => {
     if (!jobId || !window.confirm("Are you sure you want to delete this job?"))
       return;
-
     try {
       await deleteJobById(jobId);
       navigate("/jobs");
@@ -144,26 +147,21 @@ export default function JobDetailsPage() {
       const uploadedCoverLetterUrl =
         await coverLetterRef.current?.uploadManually();
 
-      console.log("Uploading job with resumeUrl:", resumeUrl);
-      console.log("Uploading job with coverLetterUrl:", coverLetterUrl);
+      if (uploadedResumeUrl) setResumeUrl(uploadedResumeUrl);
+      if (uploadedCoverLetterUrl) setCoverLetterUrl(uploadedCoverLetterUrl);
 
       await updateJob(jobId, user.uid, {
         company: data.company,
         title: data.title,
         status: data.status,
         notes: data.notes,
-        resumeUrl: uploadedResumeUrl ?? resumeUrl ?? null, //save resume
-        coverLetterUrl: uploadedCoverLetterUrl ?? coverLetterUrl ?? null, //save cover letter
+        resumeUrl: uploadedResumeUrl ?? resumeUrl ?? null,
+        resumeName: resumeName ?? null,
+        coverLetterUrl: uploadedCoverLetterUrl ?? coverLetterUrl ?? null,
+        coverLetterName: coverLetterName ?? null,
       });
 
       setAlert({ type: "success", message: "Changes saved!" });
-      reset({
-        ...data,
-        resumeUrl: uploadedResumeUrl ?? resumeUrl ?? "",
-        coverLetterUrl: uploadedCoverLetterUrl ?? coverLetterUrl ?? "",
-      });
-      setResumeUrl(resumeUrl);
-      setCoverLetterUrl(coverLetterUrl);
       setIsResumeChanged(false);
       setIsCoverLetterChanged(false);
     } catch (err: any) {
@@ -179,14 +177,15 @@ export default function JobDetailsPage() {
     { value: "rejected", label: "Rejected" },
   ];
 
-  if (loading)
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
     );
+  }
 
-  if (!job)
+  if (!job) {
     return (
       <Card className="max-w-2xl mx-auto text-center">
         <Text variant="h1">Job not found</Text>
@@ -199,11 +198,12 @@ export default function JobDetailsPage() {
         </Button>
       </Card>
     );
+  }
 
   return (
     <Card className="max-w-2xl mx-auto">
       <Text variant="h1" className="mb-6">
-        Edit Job
+        Job Details
       </Text>
 
       {alert && (
@@ -214,13 +214,42 @@ export default function JobDetailsPage() {
         />
       )}
 
+      {resumeUrl && (
+        <div className="mt-4">
+          <Text className="text-sm font-medium text-gray-700">Resume:</Text>
+          <a
+            href={resumeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline text-sm"
+          >
+            {resumeName || "View Resume"}
+          </a>
+        </div>
+      )}
+
+      {coverLetterUrl && (
+        <div className="mt-4">
+          <Text className="text-sm font-medium text-gray-700">
+            Cover Letter:
+          </Text>
+          <a
+            href={coverLetterUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline text-sm"
+          >
+            {coverLetterName || "View Cover Letter"}
+          </a>
+        </div>
+      )}
+
       <form onSubmit={onSubmit} className="space-y-4">
         <Input
           label="Job Title"
           {...register("title")}
           error={errors.title?.message}
         />
-
         <Input
           label="Company"
           {...register("company")}
@@ -232,28 +261,26 @@ export default function JobDetailsPage() {
           {...register("status")}
           error={errors.status?.message}
         />
-
         <TextArea label="Notes" rows={4} {...register("notes")} />
 
-        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Resume:
-        </p>
-
-        {/*Cover Letter*/}
+        <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Resume
+        </Text>
         {resumeUrl && (
-          <div className="mt-6">
+          <div className="mt-2">
             <a
-              href={resumeUrl || job.resumeUrl}
+              href={resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:underline text-sm"
             >
-              View
+              {resumeName || "View Resume"}
             </a>
             <button
               type="button"
               onClick={() => {
-                setResumeUrl(null); //remove resume
+                setResumeUrl(null);
+                setResumeName(null);
               }}
               className="text-red-600 text-sm ml-4 hover:underline"
             >
@@ -261,41 +288,37 @@ export default function JobDetailsPage() {
             </button>
           </div>
         )}
-
-        {/* dropzone to upload or replace resume */}
         <Dropzone
           ref={resumeRef}
           endpoint="resumeUploader"
-          label={job.resumeUrl ? "Replace Resume" : "Upload Resume"}
+          label="Upload Resume"
           variant="default"
-          onFileSelected={() => {
+          onFileSelected={() => setIsResumeChanged(true)}
+          onUploadComplete={(url, name) => {
+            setResumeUrl(url);
+            setResumeName(name);
             setIsResumeChanged(true);
-          }}
-          onUploadComplete={(url) => {
-            setResumeUrl(url); //save uploaded file
-            setIsResumeChanged(true);
-            console.log("resume changed");
           }}
         />
 
-        {/*Cover Letter*/}
-        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Cover Letter:
-        </p>
+        <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-6 mb-1">
+          Cover Letter
+        </Text>
         {coverLetterUrl && (
-          <div className="mt-6">
+          <div className="mt-2">
             <a
-              href={coverLetterUrl || job.coverLetterUrl}
+              href={coverLetterUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:underline text-sm"
             >
-              View
+              {coverLetterName || "View Cover Letter"}
             </a>
             <button
               type="button"
               onClick={() => {
-                setCoverLetterUrl(null); //remove resume
+                setCoverLetterUrl(null);
+                setCoverLetterName(null);
               }}
               className="text-red-600 text-sm ml-4 hover:underline"
             >
@@ -303,20 +326,16 @@ export default function JobDetailsPage() {
             </button>
           </div>
         )}
-        {/* dropzone to upload or replace cover letter */}
         <Dropzone
           ref={coverLetterRef}
           endpoint="coverLetterUploader"
-          label={
-            job.coverLetterUrl ? "Replace Cover Letter" : "Upload Cover Letter"
-          }
+          label="Upload Cover Letter"
           variant="default"
-          onFileSelected={() => {
+          onFileSelected={() => setIsCoverLetterChanged(true)}
+          onUploadComplete={(url, name) => {
+            setCoverLetterUrl(url);
+            setCoverLetterName(name);
             setIsCoverLetterChanged(true);
-          }}
-          onUploadComplete={(url) => {
-            setIsCoverLetterChanged(true);
-            setCoverLetterUrl(url); //save uploaded file
           }}
         />
 

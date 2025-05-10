@@ -14,7 +14,8 @@ interface Job {
   status: string;
   appliedAt?: any;
   notes?: string;
-  resumeUrl?: string;
+  resume?: { url: string; name: string };
+  coverLetter?: { url: string; name: string };
 }
 
 export default function JobListPage() {
@@ -24,25 +25,34 @@ export default function JobListPage() {
   const [filter, setFilter] = useState<string>("");
   const [isExporting, setIsExporting] = useState(false);
 
+  // fetch jobs for logged-in user
   useEffect(() => {
     if (!user) return;
 
     const fetchJobs = async () => {
-      const data = await getJobsByUser(user.uid);
-      setJobs(data as any);
+      try {
+        const data = await getJobsByUser(user.uid);
+        setJobs(data as Job[]);
+      } catch (err) {
+        console.error("Failed to fetch jobs", err);
+      }
     };
 
     fetchJobs();
   }, [user]);
 
+  // filter jobs based on selected status
   const filteredJobs = filter
     ? jobs.filter((job) => job.status === filter)
     : jobs;
 
+  // handle CSV export
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      const filename = `job-applications-${new Date().toLocaleDateString().replace(/\//g, "-")}.csv`;
+      const filename = `job-applications-${new Date()
+        .toLocaleDateString()
+        .replace(/\//g, "-")}.csv`;
       exportToCSV(filteredJobs, filename);
     } catch (error) {
       console.error("Export failed:", error);
@@ -60,12 +70,15 @@ export default function JobListPage() {
   ];
 
   if (loading) return <div>Loading...</div>;
+
   return (
     <Card className="max-w-4xl mx-auto p-6 rounded-lg">
       <div
         className={`flex justify-between items-center mb-6 ${theme.colors.text.body}`}
       >
         <Text variant="h1">Your Job Applications</Text>
+
+        {/* export button with loading state */}
         <Button
           onClick={handleExport}
           disabled={isExporting || jobs.length === 0}
@@ -75,6 +88,7 @@ export default function JobListPage() {
         >
           {isExporting ? (
             <span className="flex items-center">
+              {/* spinning icon while exporting */}
               <svg
                 className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
                 xmlns="http://www.w3.org/2000/svg"
@@ -103,6 +117,7 @@ export default function JobListPage() {
         </Button>
       </div>
 
+      {/* filter by job status */}
       <div className="mb-4 flex items-center">
         <Text variant="label" className="mr-2">
           Filter by status:
@@ -120,6 +135,7 @@ export default function JobListPage() {
         </select>
       </div>
 
+      {/* job list display */}
       {filteredJobs.length === 0 ? (
         <Text variant="small">No jobs found.</Text>
       ) : (
@@ -130,13 +146,29 @@ export default function JobListPage() {
               className={`border ${theme.colors.border} p-4 rounded ${theme.colors.background.card} hover:shadow transition`}
             >
               <Text variant="h3">{job.title}</Text>
-              {job.resumeUrl && (
-                <PaperclipIcon className="w-5 h-5 text-gray-500" />
+
+              {/* show resume icon if attached */}
+              {job.resume?.url && (
+                <PaperclipIcon
+                  className="w-5 h-5 text-gray-500"
+                  title="Resume attached"
+                />
               )}
+
+              {/* show cover letter icon if attached */}
+              {job.coverLetter?.url && (
+                <PaperclipIcon
+                  className="w-5 h-5 text-green-500"
+                  title="Cover Letter attached"
+                />
+              )}
+
               <Text variant="small">{job.company}</Text>
               <p className="text-sm mt-1 text-gray-700 dark:text-gray-300">
                 Status: <span className="font-medium">{job.status}</span>
               </p>
+
+              {/* view details link */}
               <Link
                 to={`/job/${job.id}`}
                 className={`${theme.colors.primary.default} text-sm mt-2 inline-block`}
