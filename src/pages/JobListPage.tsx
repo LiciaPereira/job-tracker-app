@@ -3,7 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import { getJobsByUser } from "../features/jobs/services/getJobByUser";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { exportToCSV } from "../utils/csvExport";
-import { Card, Text, Button, Select } from "../components/ui";
+import { Card, Text, Button } from "../components/ui";
 import { useTheme } from "../hooks/useTheme";
 import { PaperclipIcon } from "../components/ui/icons";
 
@@ -97,18 +97,59 @@ export default function JobListPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="space-y-6">
-        {/* Header Section */}
+        {/* Header Section */}{" "}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          {" "}
           <div>
             <Text variant="h1" className="mb-2">
               Job Applications
             </Text>
             <Text variant="body" color="primary">
-              {filteredJobs.length}{" "}
-              {filteredJobs.length === 1 ? "application" : "applications"} found
+              {"Total of "}
+              {jobs.length} {jobs.length === 1 ? "application" : "applications"}
+              {filter && (
+                <>
+                  {" - Viewing "}
+                  <span className="font-semibold">
+                    {filteredJobs.length}
+                    {" ("}
+                    {
+                      statusOptions.find((option) => option.value === filter)
+                        ?.label
+                    }
+                    {")"}
+                  </span>
+                </>
+              )}
             </Text>
           </div>{" "}
-          <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-2">
+          <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row items-center gap-2">
+            <div
+              className={`transition-all duration-300 ${
+                highlightFilter
+                  ? "ring-2 ring-primary-500 dark:ring-primary-400 rounded-lg shadow-md"
+                  : ""
+              }`}
+            >
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                aria-label="Filter by status"
+                className={`
+                  px-3 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-600
+                  bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                  focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500
+                  dark:focus:ring-primary-400 dark:focus:border-primary-400
+                  ${highlightFilter ? "animate-pulse" : ""}
+                `}
+              >
+                {statusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
             <Button
               onClick={handleExport}
               disabled={isExporting || jobs.length === 0}
@@ -134,7 +175,7 @@ export default function JobListPage() {
                   </svg>
                 )
               }
-            />{" "}
+            />
             <Link to="/add-job">
               <Button
                 variant="primary"
@@ -161,27 +202,6 @@ export default function JobListPage() {
             </Link>
           </div>
         </div>
-        {/* Filters Section */}
-        <Card
-          elevated
-          className={`p-4 transition-all duration-300 ${
-            highlightFilter
-              ? "ring-2 ring-primary-500 dark:ring-primary-400 shadow-lg"
-              : ""
-          }`}
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex-1">
-              <Select
-                label="Filter by status"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                options={statusOptions}
-                className={highlightFilter ? "animate-pulse" : ""}
-              />
-            </div>
-          </div>
-        </Card>
         {/* Job List */}
         {filteredJobs.length === 0 ? (
           <Card elevated className="p-8 text-center">

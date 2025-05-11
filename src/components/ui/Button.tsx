@@ -57,7 +57,7 @@ export const Button: React.FC<ButtonProps> = ({
           transform hover:-translate-y-0.5 active:translate-y-0`;
       case "outline":
         return `${baseClasses} ${focusClasses} ${disabledClasses}
-          border-2 border-primary-600 dark:border-primary-400
+          border border-primary-600 dark:border-primary-400
           text-primary-600 dark:text-primary-400
           hover:bg-primary-50 dark:hover:bg-primary-900
           focus:ring-primary-500 dark:focus:ring-primary-400`;
