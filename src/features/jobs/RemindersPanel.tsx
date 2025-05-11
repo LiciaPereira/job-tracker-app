@@ -9,18 +9,30 @@ import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import { Alert } from "../../components/Alert";
 import { Card, Text, Button } from "../../components/ui";
-import { useTheme } from "../../hooks/useTheme";
+import { ReminderSkeleton } from "../../components/ReminderSkeleton";
+import { CalendarIcon } from "@heroicons/react/24/outline";
+import { ReminderItem } from "../../components/ReminderItem";
+import { EmptyState } from "../../components/EmptyState";
 
-export function RemindersPanel() {
+interface RemindersPanelProps {
+  // If true, displays the header with title and count. If false, hides the header.
+  showHeader?: boolean;
+}
+
+// The RemindersPanel component displays a list of active reminders
+const RemindersPanel = ({ showHeader = true }: RemindersPanelProps) => {
+  // Auth context to get current user ID
   const { user } = useAuth();
-  const { theme } = useTheme();
+  // State for reminders data
   const [reminders, setReminders] = useState<Reminder[]>([]);
+  // Alert state for success/error messages
   const [alert, setAlert] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
+  // Loading state for showing skeleton while data is fetching
+  const [isLoading, setIsLoading] = useState(true);
 
-  //fetch active reminders for the current user
   useEffect(() => {
     if (!user) return;
 
@@ -30,13 +42,14 @@ export function RemindersPanel() {
         setReminders(activeReminders);
       } catch (err: any) {
         setAlert({ type: "error", message: "Failed to load reminders" });
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchReminders();
   }, [user]);
 
-  //handle marking a reminder as complete
   const handleComplete = async (reminderId: string) => {
     try {
       await completeReminder(reminderId);
@@ -49,50 +62,59 @@ export function RemindersPanel() {
     }
   };
   return (
-    <>
-      <Text variant="h3" className="mb-4">
-        Upcoming Follow-ups ({reminders.length})
-      </Text>
-
-      {alert && (
-        <Alert
-          type={alert.type}
-          message={alert.message}
-          onClose={() => setAlert(null)}
-        />
-      )}
-
-      {reminders.length === 0 ? (
-        <Text variant="small">No upcoming follow-ups</Text>
-      ) : (
-        <div className="overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 h-[calc(100vh-20rem)]">
-          <ul className="space-y-3 pr-2">
-            {reminders.map((reminder) => (
-              <li
-                key={reminder.id}
-                className={`flex items-center justify-between p-3 ${theme.colors.background.card} rounded ${theme.colors.border}`}
-              >
-                <div>
-                  <Link
-                    to={`/job/${reminder.jobId}`}
-                    className={`text-sm font-medium ${theme.colors.primary.default} hover:underline`}
-                  >
-                    Follow up due {format(reminder.dueDate, "MMM d")}
-                  </Link>
-                </div>
-                <Button
-                  variant="success"
-                  size="sm"
-                  onClick={() => reminder.id && handleComplete(reminder.id)}
-                  className="text-sm"
-                >
-                  Mark as done
-                </Button>
-              </li>
-            ))}
-          </ul>
+    <div className="h-full flex flex-col">
+      <div className="flex justify-between items-center mb-4 items-baseline">
+        <Text variant="h2" className="flex-shrink-0">
+          Reminders
+        </Text>
+        {/* Header section - Only displayed when showHeader is true */}
+        {showHeader && (
+          <span className="text-sm text-gray-500 dark:text-gray-400 text-right">
+            {reminders.length} reminder{reminders.length !== 1 ? "s" : ""}
+          </span>
+        )}{" "}
+      </div>
+      {/* Main content area with overflow scrolling */}
+      <div className="flex-1 overflow-y-auto">
+        <div className={`p-2 pl-0 ${alert ? "pt-3" : ""}`}>
+          {/* Alert message for operation feedback */}
+          {alert && (
+            <div className="mb-4">
+              <Alert
+                type={alert.type}
+                message={alert.message}
+                onClose={() => setAlert(null)}
+              />
+            </div>
+          )}
+          {isLoading ? (
+            <div className="space-y-4">
+              <ReminderSkeleton />
+              <ReminderSkeleton />
+              <ReminderSkeleton />
+            </div>
+          ) : reminders.length > 0 ? (
+            <ul className="space-y-4">
+              {" "}
+              {reminders.map((reminder) => (
+                <ReminderItem
+                  key={reminder.id}
+                  reminder={reminder}
+                  onComplete={handleComplete}
+                />
+              ))}
+            </ul>
+          ) : (
+            <EmptyState
+              title="No reminders"
+              description="You don't have any upcoming reminders"
+              icon={CalendarIcon}
+            />
+          )}
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
-}
+};
+
+export { RemindersPanel };

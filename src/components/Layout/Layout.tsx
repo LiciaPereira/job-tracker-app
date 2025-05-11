@@ -11,14 +11,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user } = useAuth();
 
   return (
-    <div>
+    <div className="h-screen overflow-hidden flex flex-col">
       {user && <Navbar />}
       <main
-        className={`min-h-screen ${theme.colors.background.page} ${
+        className={`flex-1 ${theme.colors.background.page} ${
           user ? "pt-16" : ""
-        }`}
+        } overflow-hidden`}
       >
-        {children}
+        <div className="h-full overflow-hidden">{children}</div>
       </main>
     </div>
   );
