@@ -6,7 +6,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
   isLoading?: boolean;
   icon?: React.ReactNode;
-  iconPosition?: "left" | "right";
+  iconPosition?: "center" | "left" | "right";
   fullWidth?: boolean;
 }
 
@@ -17,7 +17,7 @@ export const Button: React.FC<ButtonProps> = ({
   className = "",
   isLoading = false,
   icon,
-  iconPosition = "left",
+  iconPosition = "center",
   fullWidth = false,
   disabled,
   ...props
@@ -105,14 +105,13 @@ export const Button: React.FC<ButtonProps> = ({
       />
     </svg>
   );
-
   return (
     <button
       className={`
         ${getVariantClasses()} 
         ${getSizeClasses()}
         ${fullWidth ? "w-full" : ""}
-        rounded-lg
+        rounded-lg min-h-10
         ${className}
       `}
       disabled={disabled || isLoading}
@@ -122,7 +121,18 @@ export const Button: React.FC<ButtonProps> = ({
       {icon && iconPosition === "left" && !isLoading && (
         <span className="mr-2">{icon}</span>
       )}
-      <span className={isLoading ? "opacity-75" : ""}>{children}</span>
+      {(!icon || iconPosition !== "center" || isLoading) && (
+        <span className={isLoading ? "opacity-75" : ""}>{children}</span>
+      )}
+      {icon && iconPosition === "center" && !isLoading && !children && (
+        <span>{icon}</span>
+      )}
+      {icon && iconPosition === "center" && !isLoading && children && (
+        <div className="flex flex-col items-center">
+          <span className="mb-1">{icon}</span>
+          <span>{children}</span>
+        </div>
+      )}
       {icon && iconPosition === "right" && !isLoading && (
         <span className="ml-2">{icon}</span>
       )}
