@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { getJobsByUser } from "../features/jobs/services/getJobByUser";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { exportToCSV } from "../utils/csvExport";
 import { Card, Text, Button, Select } from "../components/ui";
 import { useTheme } from "../hooks/useTheme";
@@ -22,10 +22,11 @@ export default function JobListPage() {
   const { user, loading } = useAuth();
   const { theme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filter, setFilter] = useState<string>("");
   const [isExporting, setIsExporting] = useState(false);
-
+  const [highlightFilter, setHighlightFilter] = useState(false);
   // fetch jobs for logged-in user
   useEffect(() => {
     if (!user) return;
@@ -40,7 +41,22 @@ export default function JobListPage() {
     };
 
     fetchJobs();
-  }, [user]);
+  }, [user]); //set initial filter from navigation state if available and highlight the filter
+  useEffect(() => {
+    const state = location.state as { initialFilter?: string } | null;
+    if (state && state.initialFilter !== undefined) {
+      setFilter(state.initialFilter || "");
+      setHighlightFilter(true);
+
+      //automatically turn off highlight after 0.75 seconds
+      const timer = setTimeout(() => setHighlightFilter(false), 750);
+
+      //clear the state after use to prevent filter persistence on page refreshes
+      window.history.replaceState({}, document.title);
+
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
 
   // filter jobs based on selected status
   const filteredJobs = filter
@@ -169,10 +185,16 @@ export default function JobListPage() {
               )}
             </Button>
           </div>
-        </div>
-
+        </div>{" "}
         {/* Filters Section */}
-        <Card elevated className="p-4">
+        <Card
+          elevated
+          className={`p-4 transition-all duration-300 ${
+            highlightFilter
+              ? "ring-2 ring-primary-500 dark:ring-primary-400 shadow-lg"
+              : ""
+          }`}
+        >
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1">
               <Select
@@ -180,11 +202,11 @@ export default function JobListPage() {
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 options={statusOptions}
+                className={highlightFilter ? "animate-pulse" : ""}
               />
             </div>
           </div>
         </Card>
-
         {/* Job List */}
         {filteredJobs.length === 0 ? (
           <Card elevated className="p-8 text-center">
@@ -254,40 +276,42 @@ export default function JobListPage() {
                     </div>
                   </div>
 
-                  <div className="mt-4 flex items-center space-x-2">
-                    {job.resume?.url && (
-                      <span
-                        title="Resume attached"
-                        className="flex items-center text-gray-500"
-                      >
-                        <PaperclipIcon className="w-4 h-4" />
-                      </span>
-                    )}
-                    {job.coverLetter?.url && (
-                      <span
-                        title="Cover Letter attached"
-                        className="flex items-center text-gray-500"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                      </span>
-                    )}
+                  <div className="mt-4 flex items-center space-x-2 justify-between">
                     {job.appliedAt && (
                       <Text variant="small" className="text-gray-500">
-                        Applied {new Date(job.appliedAt).toLocaleDateString()}
+                        Applied {job.appliedAt.toDate().toLocaleDateString()}
                       </Text>
                     )}
+                    <div className="inline-flex">
+                      {job.resume?.url && (
+                        <span
+                          title="Resume attached"
+                          className="flex items-center text-gray-500"
+                        >
+                          <PaperclipIcon className="w-4 h-4" />
+                        </span>
+                      )}
+                      {job.coverLetter?.url && (
+                        <span
+                          title="Cover Letter attached"
+                          className="flex items-center text-gray-500"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Card>
