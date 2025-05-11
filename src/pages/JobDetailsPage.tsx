@@ -223,229 +223,21 @@ export default function JobDetailsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8 flex justify-between items-start">
-        <div>
-          <Text variant="h1" className="mb-2">
-            Job Details
-          </Text>
-          <Text variant="body" className="text-gray-600 dark:text-gray-400">
-            Manage your application details and documents
-          </Text>
-        </div>
-        <Button
-          variant="danger"
-          onClick={handleDelete}
-          icon={
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
-          }
-        >
-          Delete Job
-        </Button>
-      </div>
-
-      {alert && (
-        <div className="mb-6">
-          <Alert
-            type={alert.type}
-            message={alert.message}
-            onClose={() => setAlert(null)}
-          />
-        </div>
-      )}
-
-      <form onSubmit={onSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Job Details */}
-          <Card elevated className="p-6">
-            <Text variant="h2" className="mb-6">
-              Job Information
-            </Text>
-            <div className="space-y-6">
-              <Input
-                label="Job Title"
-                {...register("title")}
-                error={errors.title?.message}
-                placeholder="Enter job title"
-                required
-              />
-              <Input
-                label="Company"
-                {...register("company")}
-                error={errors.company?.message}
-                placeholder="Enter company name"
-                required
-              />
-              <Select
-                label="Application Status"
-                options={statusOptions}
-                {...register("status")}
-                error={errors.status?.message}
-                required
-              />
-              <TextArea
-                label="Notes"
-                rows={4}
-                {...register("notes")}
-                helperText="Add any important details about interviews, contacts, or follow-ups"
-              />
+    <div className="h-full w-full flex flex-col overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8 flex justify-between items-start">
+            <div>
+              <Text variant="h1" className="mb-2">
+                Job Details
+              </Text>
+              <Text variant="body" className="text-gray-600 dark:text-gray-400">
+                Manage your application details and documents
+              </Text>
             </div>
-          </Card>
-
-          {/* Right Column - Documents */}
-          <Card elevated className="p-6">
-            <Text variant="h2" className="mb-6">
-              Application Documents
-            </Text>
-            <div className="space-y-6">
-              {/* Resume Section */}
-              <div>
-                <Text variant="h3" className="mb-4">
-                  Resume
-                </Text>
-                {resumeUrl ? (
-                  <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
-                    <div className="flex items-center space-x-2">
-                      <svg
-                        className="w-5 h-5 text-gray-500 group-hover:text-primary-500 transition-colors duration-200"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                      <a
-                        href={resumeUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 rounded transition-colors duration-200"
-                      >
-                        {resumeName || "View Resume"}
-                      </a>
-                    </div>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => {
-                        setResumeUrl(null);
-                        setResumeName(null);
-                        setIsResumeChanged(true);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:opacity-100"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ) : null}
-                <Dropzone
-                  ref={resumeRef}
-                  endpoint="resumeUploader"
-                  label="Upload a new resume (PDF)"
-                  variant="default"
-                  onFileSelected={() => setIsResumeChanged(true)}
-                  onUploadComplete={(url, name) => {
-                    setResumeUrl(url);
-                    setResumeName(name);
-                    setIsResumeChanged(true);
-                  }}
-                />
-              </div>
-
-              {/* Cover Letter Section */}
-              <div>
-                <Text variant="h3" className="mb-4">
-                  Cover Letter
-                </Text>
-                {coverLetterUrl ? (
-                  <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
-                    <div className="flex items-center space-x-2">
-                      <svg
-                        className="w-5 h-5 text-gray-500 group-hover:text-primary-500 transition-colors duration-200"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                      <a
-                        href={coverLetterUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 rounded transition-colors duration-200"
-                      >
-                        {coverLetterName || "View Cover Letter"}
-                      </a>
-                    </div>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => {
-                        setCoverLetterUrl(null);
-                        setCoverLetterName(null);
-                        setIsCoverLetterChanged(true);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:opacity-100"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ) : null}
-                <Dropzone
-                  ref={coverLetterRef}
-                  endpoint="coverLetterUploader"
-                  label="Upload a new cover letter (PDF)"
-                  variant="default"
-                  onFileSelected={() => setIsCoverLetterChanged(true)}
-                  onUploadComplete={(url, name) => {
-                    setCoverLetterUrl(url);
-                    setCoverLetterName(name);
-                    setIsCoverLetterChanged(true);
-                  }}
-                />
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Save Changes Button */}
-        {(isDirty || isResumeChanged || isCoverLetterChanged) && (
-          <div className="mt-8 flex justify-end gap-4">
             <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                reset();
-                setIsResumeChanged(false);
-                setIsCoverLetterChanged(false);
-              }}
-            >
-              Cancel Changes
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
+              variant="danger"
+              onClick={handleDelete}
               icon={
                 <svg
                   className="w-5 h-5"
@@ -457,16 +249,228 @@ export default function JobDetailsPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M5 13l4 4L19 7"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                   />
                 </svg>
               }
             >
-              Save Changes
+              Delete Job
             </Button>
           </div>
-        )}
-      </form>
+
+          {alert && (
+            <div className="mb-6">
+              <Alert
+                type={alert.type}
+                message={alert.message}
+                onClose={() => setAlert(null)}
+              />
+            </div>
+          )}
+
+          <form onSubmit={onSubmit}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Job Details */}
+              <Card elevated className="p-6">
+                <Text variant="h2" className="mb-6">
+                  Job Information
+                </Text>
+                <div className="space-y-6">
+                  <Input
+                    label="Job Title"
+                    {...register("title")}
+                    error={errors.title?.message}
+                    placeholder="Enter job title"
+                    required
+                  />
+                  <Input
+                    label="Company"
+                    {...register("company")}
+                    error={errors.company?.message}
+                    placeholder="Enter company name"
+                    required
+                  />
+                  <Select
+                    label="Application Status"
+                    options={statusOptions}
+                    {...register("status")}
+                    error={errors.status?.message}
+                    required
+                  />
+                  <TextArea
+                    label="Notes"
+                    rows={4}
+                    {...register("notes")}
+                    helperText="Add any important details about interviews, contacts, or follow-ups"
+                  />
+                </div>
+              </Card>
+
+              {/* Right Column - Documents */}
+              <Card elevated className="p-6">
+                <Text variant="h2" className="mb-6">
+                  Application Documents
+                </Text>
+                <div className="space-y-6">
+                  {/* Resume Section */}
+                  <div>
+                    <Text variant="h3" className="mb-4">
+                      Resume
+                    </Text>
+                    {resumeUrl ? (
+                      <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                        <div className="flex items-center space-x-2">
+                          <svg
+                            className="w-5 h-5 text-gray-500 group-hover:text-primary-500 transition-colors duration-200"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                          <a
+                            href={resumeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 rounded transition-colors duration-200"
+                          >
+                            {resumeName || "View Resume"}
+                          </a>
+                        </div>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => {
+                            setResumeUrl(null);
+                            setResumeName(null);
+                            setIsResumeChanged(true);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:opacity-100"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ) : null}
+                    <Dropzone
+                      ref={resumeRef}
+                      endpoint="resumeUploader"
+                      label="Upload a new resume (PDF)"
+                      variant="default"
+                      onFileSelected={() => setIsResumeChanged(true)}
+                      onUploadComplete={(url, name) => {
+                        setResumeUrl(url);
+                        setResumeName(name);
+                        setIsResumeChanged(true);
+                      }}
+                    />
+                  </div>
+
+                  {/* Cover Letter Section */}
+                  <div>
+                    <Text variant="h3" className="mb-4">
+                      Cover Letter
+                    </Text>
+                    {coverLetterUrl ? (
+                      <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                        <div className="flex items-center space-x-2">
+                          <svg
+                            className="w-5 h-5 text-gray-500 group-hover:text-primary-500 transition-colors duration-200"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                          <a
+                            href={coverLetterUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 rounded transition-colors duration-200"
+                          >
+                            {coverLetterName || "View Cover Letter"}
+                          </a>
+                        </div>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => {
+                            setCoverLetterUrl(null);
+                            setCoverLetterName(null);
+                            setIsCoverLetterChanged(true);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:opacity-100"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ) : null}
+                    <Dropzone
+                      ref={coverLetterRef}
+                      endpoint="coverLetterUploader"
+                      label="Upload a new cover letter (PDF)"
+                      variant="default"
+                      onFileSelected={() => setIsCoverLetterChanged(true)}
+                      onUploadComplete={(url, name) => {
+                        setCoverLetterUrl(url);
+                        setCoverLetterName(name);
+                        setIsCoverLetterChanged(true);
+                      }}
+                    />
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Save Changes Button */}
+            {(isDirty || isResumeChanged || isCoverLetterChanged) && (
+              <div className="mt-8 flex justify-end gap-4">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    reset();
+                    setIsResumeChanged(false);
+                    setIsCoverLetterChanged(false);
+                  }}
+                >
+                  Cancel Changes
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  icon={
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  }
+                >
+                  Save Changes
+                </Button>
+              </div>
+            )}
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
