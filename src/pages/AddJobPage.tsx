@@ -6,6 +6,7 @@ import * as yup from "yup";
 import { addJob } from "../features/jobs/services/addJob";
 import { useAuth } from "../hooks/useAuth";
 import { Alert } from "../components/Alert";
+import { PageHeader } from "../components/Layout";
 import {
   Card,
   Text,
@@ -121,72 +122,38 @@ export default function AddJobPage() {
   ];
   return (
     <div className="h-full w-full flex flex-col overflow-hidden">
-      {/*header with buttons that's always visible - matches JobDetailsPage */}
-      <div className="top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm py-3 z-1">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex gap-2 xs:flex-row xs:justify-between xs:items-center">
-            <div className="flex-1 min-w-0">
-              <Text variant="h1" className="truncate">
-                Add New Job
-              </Text>
-            </div>
-            {/* Action button group */}
-            <div className="flex flex-row gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => navigate("/jobs")}
-                icon={
-                  <svg
-                    className="w-4 h-4"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    fill="none"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                }
-              ></Button>
-              <Button
-                type="submit"
-                form="add-job-form"
-                variant="primary"
-                size="sm"
-                icon={
-                  <svg
-                    className="w-4 h-4"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    fill="none"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                }
-              ></Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <PageHeader
+        title="Add New Job"
+        description="Track your new job application and related documents"
+        backPath="/jobs"
+        actions={
+          <Button
+            type="submit"
+            form="add-job-form"
+            variant="primary"
+            size="sm"
+            icon={
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            }
+            aria-label="Save job"
+          />
+        }
+      />{" "}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-6 md:py-8">
-          <div className="mb-6">
-            <Text variant="body" className="text-gray-600 dark:text-gray-400">
-              Track your new job application and related documents
-            </Text>
-          </div>
-
           {alert && (
             <div className="mb-6">
               <Alert

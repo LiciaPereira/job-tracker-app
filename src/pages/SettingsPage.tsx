@@ -8,6 +8,7 @@ import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Card, Text, Input, Button } from "../components/ui";
+import { PageHeader } from "../components/Layout";
 
 interface ProfileFormValues {
   firstName: string;
@@ -117,17 +118,13 @@ export default function SettingsPage() {
 
   return (
     <div className="h-full w-full flex flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto px-2 sm:px-4 lg:px-8 py-6 xs:py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <Text variant="h1" className="mb-2 text-2xl md:text-3xl">
-              Account Settings
-            </Text>
-            <Text variant="body" className="text-gray-600 dark:text-gray-400">
-              Manage your profile and account preferences
-            </Text>
-          </div>
+      <PageHeader
+        title="Account Settings"
+        description="Manage your profile and account preferences"
+      />
 
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-6 md:py-8">
           {alert && (
             <div className="mb-6">
               <Alert

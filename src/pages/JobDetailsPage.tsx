@@ -8,6 +8,7 @@ import { deleteJobById, updateJob } from "../features/jobs/services/jobService";
 import { useAuth } from "../hooks/useAuth";
 import { Alert } from "../components/Alert";
 import { useBlocker } from "../hooks/useBlocker";
+import { PageHeader } from "../components/Layout";
 import {
   Card,
   Text,
@@ -295,95 +296,68 @@ export default function JobDetailsPage() {
 
   return (
     <div className="h-full w-full flex flex-col overflow-hidden">
-      {/* header with buttons */}
-      <div className="top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm py-3 z-2">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex gap-2 xs:flex-row xs:justify-between xs:items-center">
-            <div className="flex-1 min-w-0">
-              <Text variant="h1" className="text-xl md:text-2xl truncate">
-                Job Details
-              </Text>
-            </div>
-            {/* action button group */}
-            <div className="flex flex-row gap-2 self-end">
+      {" "}
+      <PageHeader
+        title="Job Details"
+        description={job?.company ? `${job.company} - ${job.title}` : undefined}
+        backPath="/jobs"
+        actions={
+          <>
+            {(isDirty ||
+              isResumeChanged ||
+              isCoverLetterChanged ||
+              isreminderChanged ||
+              isReminderDaysChanged) && (
               <Button
-                variant="secondary"
+                type="submit"
+                variant="primary"
                 size="sm"
-                onClick={() => {
-                  reset();
-                  setIsResumeChanged(false);
-                  setIsCoverLetterChanged(false);
-                }}
+                onClick={() => formRef.current?.requestSubmit()}
                 icon={
                   <svg
                     className="w-4 h-4"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     fill="none"
+                    aria-hidden="true"
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
+                      d="M5 13l4 4L19 7"
                     />
                   </svg>
                 }
-              ></Button>
+                aria-label="Save changes"
+              />
+            )}
 
-              {(isDirty ||
-                isResumeChanged ||
-                isCoverLetterChanged ||
-                isreminderChanged ||
-                isReminderDaysChanged) && (
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="sm"
-                  onClick={() => formRef.current?.requestSubmit()}
-                  icon={
-                    <svg
-                      className="w-4 h-4"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      fill="none"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  }
-                ></Button>
-              )}
-
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={handleDelete}
-                icon={
-                  <svg
-                    className="w-4 h-4"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    fill="none"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
-                }
-              ></Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={handleDelete}
+              icon={
+                <svg
+                  className="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+              }
+              aria-label="Delete job"
+            />
+          </>
+        }
+      />
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-6 md:py-8">
           <div className="mb-6">
