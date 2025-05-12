@@ -1,6 +1,7 @@
 import { deleteDoc, doc, getDoc } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 import { UTApi } from "uploadthing/server"; //
+import { deleteReminder } from "./reminderService";
 
 const utApi = new UTApi();
 
@@ -24,6 +25,10 @@ export async function deleteJobById(jobId: string) {
   if (jobData?.coverLetter?.url) {
     const key = extractFileKey(jobData.coverLetter.url);
     if (key) fileKeysToDelete.push(key);
+  }
+
+  if (jobData?.reminderId) {
+    await deleteReminder(jobData.reminderId);
   }
 
   if (fileKeysToDelete.length > 0) {

@@ -4,4 +4,6 @@ export { default as Input } from "./Input";
 export { default as Text } from "./Text";
 export { default as Select } from "./Select";
 export { default as TextArea } from "./TextArea";
+export { Switch } from "./Switch";
+export { SwitchWithDays } from "./SwitchWithDays";
 export * from "./Dropzone";

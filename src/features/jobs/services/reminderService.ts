@@ -8,6 +8,7 @@ import {
   updateDoc,
   doc,
   Timestamp,
+  deleteDoc,
 } from "firebase/firestore";
 
 //reminder type for job follow-ups
@@ -52,4 +53,20 @@ export async function getActiveReminders(userId: string) {
 export async function completeReminder(reminderId: string) {
   const ref = doc(db, "reminders", reminderId);
   await updateDoc(ref, { completed: true });
+}
+
+export async function updateReminder(
+  reminderId: string,
+  updates: Partial<Reminder>
+) {
+  const ref = doc(db, "reminders", reminderId);
+  return updateDoc(ref, {
+    ...updates,
+    dueDate: updates.dueDate ? Timestamp.fromDate(updates.dueDate) : undefined,
+  });
+}
+
+export async function deleteReminder(reminderId: string) {
+  const ref = doc(db, "reminders", reminderId);
+  return deleteDoc(ref);
 }

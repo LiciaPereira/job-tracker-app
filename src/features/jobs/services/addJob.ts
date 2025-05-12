@@ -1,5 +1,5 @@
 import { db } from "../../../lib/firebase";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { collection, addDoc, Timestamp, updateDoc } from "firebase/firestore";
 import { createReminder } from "./reminderService";
 import { addDays } from "date-fns";
 
@@ -12,6 +12,8 @@ interface JobData {
   notes?: string;
   resume?: { url: string; name: string } | null;
   coverLetter?: { url: string; name: string } | null;
+  reminderEnabled?: boolean;
+  reminderDays?: number;
 }
 
 export async function addJob(userId: string, job: JobData) {
@@ -34,6 +36,7 @@ export async function addJob(userId: string, job: JobData) {
     title: job.title,
     status: job.status,
     notes: job.notes ?? "",
+    reminderId: null, //initially no reminder
     appliedAt: job.appliedAt
       ? Timestamp.fromDate(new Date(job.appliedAt))
       : null,
@@ -43,17 +46,19 @@ export async function addJob(userId: string, job: JobData) {
     coverLetter: job.coverLetter ?? null,
   });
 
-  console.log("Job successfully saved with ID:", jobDoc.id);
-
-  if (job.status === "applied") {
-    await createReminder({
+  if (job.reminderEnabled && job.status === "applied") {
+    const reminderRef = await createReminder({
       jobId: jobDoc.id,
       userId,
       type: "followUp",
-      dueDate: addDays(new Date(), 3),
+      dueDate: addDays(new Date(), job.reminderDays?.valueOf() ?? 3),
       completed: false,
     });
+
+    await updateDoc(jobDoc, { reminderId: reminderRef.id });
   }
+
+  console.log("Job successfully saved with ID:", jobDoc.id);
 
   return jobDoc;
 }

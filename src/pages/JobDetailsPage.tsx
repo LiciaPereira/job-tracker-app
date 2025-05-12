@@ -20,7 +20,14 @@ import {
   TextArea,
   Dropzone,
   DropzoneRef,
+  SwitchWithDays,
 } from "../components/ui";
+import {
+  createReminder,
+  deleteReminder,
+  updateReminder,
+} from "../features/jobs/services/reminderService";
+import { addDays } from "date-fns";
 
 interface Job {
   id: string;
@@ -32,6 +39,7 @@ interface Job {
   userId: string;
   resume?: { url: string; name: string };
   coverLetter?: { url: string; name: string };
+  reminderId?: string;
 }
 
 interface FormValues {
@@ -81,6 +89,10 @@ export default function JobDetailsPage() {
   const [isResumeChanged, setIsResumeChanged] = useState(false);
   const [isCoverLetterChanged, setIsCoverLetterChanged] = useState(false);
 
+  //reminders
+  const [reminderEnabled, setReminderEnabled] = useState(true);
+  const [reminderDays, setReminderDays] = useState(3);
+
   // fetch job details
   useEffect(() => {
     if (!user || !jobId) return;
@@ -100,6 +112,7 @@ export default function JobDetailsPage() {
           coverLetterUrl: data.coverLetter?.url || "",
         });
 
+        setReminderEnabled(!!data.reminderId); // enable if there's a reminder
         setResumeUrl(data.resume?.url || null);
         setResumeName(data.resume?.name || null);
         setCoverLetterUrl(data.coverLetter?.url || null);
@@ -150,7 +163,7 @@ export default function JobDetailsPage() {
       if (uploadedResumeUrl) setResumeUrl(uploadedResumeUrl);
       if (uploadedCoverLetterUrl) setCoverLetterUrl(uploadedCoverLetterUrl);
 
-      await updateJob(jobId, user.uid, {
+      const updates = {
         company: data.company,
         title: data.title,
         status: data.status,
@@ -159,7 +172,32 @@ export default function JobDetailsPage() {
         resumeName: resumeName ?? null,
         coverLetterUrl: uploadedCoverLetterUrl ?? coverLetterUrl ?? null,
         coverLetterName: coverLetterName ?? null,
-      });
+      };
+
+      // base update
+      await updateJob(jobId, user.uid, updates);
+
+      //reminder sync logic
+      if (reminderEnabled) {
+        if (job?.reminderId) {
+          await updateReminder(job.reminderId, {
+            dueDate: addDays(new Date(), reminderDays),
+            completed: false,
+          });
+        } else {
+          const reminderRef = await createReminder({
+            jobId,
+            userId: user.uid,
+            type: "followUp",
+            dueDate: addDays(new Date(), reminderDays),
+            completed: false,
+          });
+          await updateJob(jobId, user.uid, { reminderId: reminderRef.id });
+        }
+      } else if (job?.reminderId) {
+        await deleteReminder(job.reminderId);
+        await updateJob(jobId, user.uid, { reminderId: null });
+      }
 
       setAlert({ type: "success", message: "Changes saved!" });
       setIsResumeChanged(false);
@@ -297,6 +335,13 @@ export default function JobDetailsPage() {
                     error={errors.status?.message}
                     required
                   />
+                  <SwitchWithDays
+                    checked={reminderEnabled}
+                    onToggle={() => setReminderEnabled(!reminderEnabled)}
+                    days={reminderDays}
+                    onDaysChange={setReminderDays}
+                  />
+
                   <TextArea
                     label="Notes"
                     rows={4}

@@ -15,6 +15,7 @@ import {
   TextArea,
   Dropzone,
   DropzoneRef,
+  SwitchWithDays,
 } from "../components/ui";
 
 interface FormValues {
@@ -67,6 +68,10 @@ export default function AddJobPage() {
     name: string;
   } | null>(null);
 
+  //for reminders
+  const [reminderEnabled, setReminderEnabled] = useState(true);
+  const [reminderDays, setReminderDays] = useState(3);
+
   const onSubmit = async (data: FormValues) => {
     if (!user) return;
 
@@ -95,6 +100,8 @@ export default function AddJobPage() {
         notes: data.notes ?? undefined,
         resume,
         coverLetter,
+        reminderEnabled,
+        reminderDays,
       });
 
       setAlert({ type: "success", message: "Job added!" });
@@ -170,6 +177,12 @@ export default function AddJobPage() {
                     rows={4}
                     {...register("notes")}
                     helperText="Add any important details about the role or company"
+                  />
+                  <SwitchWithDays
+                    checked={reminderEnabled}
+                    onToggle={() => setReminderEnabled(!reminderEnabled)}
+                    days={reminderDays}
+                    onDaysChange={setReminderDays}
                   />
                 </div>
               </Card>
