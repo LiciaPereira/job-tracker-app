@@ -8,7 +8,6 @@ import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Card, Text, Input, Button } from "../components/ui";
-import { useTheme } from "../hooks/useTheme";
 
 interface ProfileFormValues {
   firstName: string;
@@ -118,10 +117,10 @@ export default function SettingsPage() {
 
   return (
     <div className="h-full w-full flex flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex-1 overflow-y-auto px-2 sm:px-4 lg:px-8 py-6 xs:py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <Text variant="h1" className="mb-2">
+            <Text variant="h1" className="mb-2 text-2xl md:text-3xl">
               Account Settings
             </Text>
             <Text variant="body" className="text-gray-600 dark:text-gray-400">
@@ -141,11 +140,11 @@ export default function SettingsPage() {
 
           <div className="grid gap-8">
             {/* Read-only Email Display */}
-            <Card elevated className="p-6">
+            <Card elevated className="p-4 xs:p-5 sm:p-6">
               <Text variant="h3" className="mb-4">
                 Account Email
               </Text>
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 flex items-center justify-between">
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 flex flex-col xs:flex-row items-start xs:items-center justify-between">
                 <div>
                   <Text
                     variant="small"
@@ -160,7 +159,7 @@ export default function SettingsPage() {
                     {user?.email}
                   </Text>
                 </div>
-                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-400">
+                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-400 mt-2 xs:mt-0">
                   <svg
                     className="w-4 h-4 mr-1"
                     fill="none"
@@ -180,7 +179,7 @@ export default function SettingsPage() {
             </Card>
 
             {/* Profile Settings */}
-            <Card elevated className="p-6">
+            <Card elevated className="p-4 xs:p-5 sm:p-6">
               <Text variant="h2" className="mb-6">
                 Profile Information
               </Text>
@@ -188,7 +187,7 @@ export default function SettingsPage() {
                 onSubmit={handleProfileSubmit(onProfileSubmit)}
                 className="space-y-6"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-6">
                   <Input
                     label="First Name"
                     {...registerProfile("firstName")}
@@ -204,7 +203,7 @@ export default function SettingsPage() {
                     required
                   />
                 </div>
-                <div className="flex justify-end">
+                <div className="flex flex-col xs:flex-row justify-end gap-4">
                   <Button
                     type="submit"
                     variant="primary"
@@ -231,7 +230,7 @@ export default function SettingsPage() {
             </Card>
 
             {/* Password Settings */}
-            <Card elevated className="p-6">
+            <Card elevated className="p-4 xs:p-5 sm:p-6">
               <Text variant="h2" className="mb-6">
                 Security
               </Text>
@@ -247,7 +246,7 @@ export default function SettingsPage() {
                   placeholder="Enter your current password"
                   required
                 />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-6">
                   <Input
                     label="New Password"
                     type="password"
@@ -265,7 +264,7 @@ export default function SettingsPage() {
                     required
                   />
                 </div>
-                <div className="flex justify-end space-x-4">
+                <div className="flex flex-col xs:flex-row justify-end gap-4">
                   <Button
                     type="button"
                     variant="secondary"

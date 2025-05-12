@@ -20,7 +20,7 @@ export function Navbar() {
 
   return (
     <nav
-      className={`fixed w-full z-50 top-0 backdrop-blur-sm ${theme.colors.background.card}`}
+      className={`absolute w-full top-0 z-50 backdrop-blur-sm ${theme.colors.background.card}`}
       role="navigation"
       aria-label="Main navigation"
     >
@@ -164,8 +164,9 @@ export function Navbar() {
 
       {/* Mobile menu */}
       <div
-        className={`md:hidden ${isMobileMenuOpen ? "block" : "hidden"}`}
+        className={`md:hidden ${isMobileMenuOpen ? "block rounded-xl" : "hidden"}`}
         id="mobile-menu"
+        style={{ boxShadow: "0px 20px 20px 10px#0000001a" }}
       >
         <div className="px-2 pt-2 pb-3 space-y-1 border-t border-gray-200 dark:border-gray-700">
           <Link

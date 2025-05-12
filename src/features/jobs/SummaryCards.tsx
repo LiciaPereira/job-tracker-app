@@ -17,21 +17,16 @@ export function SummaryCards({ stats }: SummaryCardsProps) {
     navigate("/jobs", { state: { initialFilter: filter } });
   };
   return (
-    <div className="flex flex-wrap justify-center gap-4 p-1">
-      <div
-        title="View all applications"
-        aria-label="Click to view all applications"
-      >
+    <div className="inline-flex w-full justify-evenly p-2 gap-2 flex-wrap">
+      {/* All cards in one line for small/medium screens, with appropriate sizing */}
+      <div>
         <StatCard
           label="Total"
           value={stats.total}
           onClick={() => navigateToFilteredJobs(null)}
         />
       </div>
-      <div
-        title="View interview applications"
-        aria-label="Click to view applications in interview stage"
-      >
+      <div>
         <StatCard
           label="Interviews"
           value={stats.interviews}
@@ -39,10 +34,7 @@ export function SummaryCards({ stats }: SummaryCardsProps) {
           onClick={() => navigateToFilteredJobs("interviewing")}
         />
       </div>
-      <div
-        title="View job offers"
-        aria-label="Click to view applications with offers"
-      >
+      <div>
         <StatCard
           label="Offers"
           value={stats.offers}
@@ -50,10 +42,7 @@ export function SummaryCards({ stats }: SummaryCardsProps) {
           onClick={() => navigateToFilteredJobs("offered")}
         />
       </div>
-      <div
-        title="View rejected applications"
-        aria-label="Click to view rejected applications"
-      >
+      <div>
         <StatCard
           label="Rejections"
           value={stats.rejections}

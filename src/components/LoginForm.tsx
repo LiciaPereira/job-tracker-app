@@ -5,7 +5,7 @@ import { login } from "../services/authService";
 import { Alert } from "./Alert";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Input, Button, Text } from "./ui";
+import { Input, Button } from "./ui";
 
 interface LoginFormValues {
   email: string;

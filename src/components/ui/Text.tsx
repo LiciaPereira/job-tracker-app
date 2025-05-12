@@ -1,4 +1,4 @@
-import React, { ElementType, JSX } from "react";
+import React, { JSX } from "react";
 import theme from "../../utils/theme";
 
 type TextProps = {
@@ -58,7 +58,7 @@ function getDefaultElement(
 function getBaseStyles(variant: TextProps["variant"]) {
   switch (variant) {
     case "h1":
-      return `text-3xl font-bold tracking-tight sm:text-4xl ${theme.colors.text.heading}`;
+      return `text-3xl font-bold tracking-tight ${theme.colors.text.heading}`;
     case "h2":
       return `text-2xl font-semibold tracking-tight ${theme.colors.text.heading}`;
     case "h3":

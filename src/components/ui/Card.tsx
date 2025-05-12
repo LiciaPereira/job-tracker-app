@@ -20,7 +20,7 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const baseClasses = `
     ${theme.elements.card}
-    p-6
+    p-5
     ${elevated ? "shadow-md hover:shadow-lg" : ""}
     ${interactive ? "cursor-pointer transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.99]" : ""}
     ${onClick ? "focus:outline-none focus:ring-2 focus:ring-primary-500/50" : ""}

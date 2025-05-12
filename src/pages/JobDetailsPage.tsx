@@ -295,18 +295,17 @@ export default function JobDetailsPage() {
 
   return (
     <div className="h-full w-full flex flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-8 flex justify-between items-start">
-            <div>
-              <Text variant="h1" className="mb-2">
+      {/* header with buttons */}
+      <div className="top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm py-3 z-2">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+          <div className="flex gap-2 xs:flex-row xs:justify-between xs:items-center">
+            <div className="flex-1 min-w-0">
+              <Text variant="h1" className="text-xl md:text-2xl truncate">
                 Job Details
               </Text>
-              <Text variant="body" className="text-gray-600 dark:text-gray-400">
-                Manage your application details and documents
-              </Text>
             </div>
-            <div className="flex items-center gap-3 ml-auto">
+            {/* action button group */}
+            <div className="flex flex-row gap-2 self-end">
               <Button
                 variant="secondary"
                 size="sm"
@@ -382,6 +381,16 @@ export default function JobDetailsPage() {
               ></Button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-6 md:py-8">
+          <div className="mb-6">
+            <Text variant="body" className="text-gray-600 dark:text-gray-400">
+              Manage your application details and documents
+            </Text>
+          </div>
 
           {alert && (
             <div className="mb-6">
@@ -394,13 +403,13 @@ export default function JobDetailsPage() {
           )}
 
           <form ref={formRef} onSubmit={onSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Left Column - Job Details */}
-              <Card elevated className="p-6">
-                <Text variant="h2" className="mb-6">
+              <Card elevated className="p-4 xs:p-5 sm:p-6">
+                <Text variant="h2" className="mb-6 text-lg md:text-xl">
                   Job Information
                 </Text>
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <Input
                     label="Job Title"
                     {...register("title")}
@@ -428,7 +437,6 @@ export default function JobDetailsPage() {
                     days={reminderDays}
                     onDaysChange={setReminderDays}
                   />
-
                   <TextArea
                     label="Notes"
                     rows={4}
@@ -439,8 +447,8 @@ export default function JobDetailsPage() {
               </Card>
 
               {/* Right Column - Documents */}
-              <Card elevated className="p-6">
-                <Text variant="h2" className="mb-6">
+              <Card elevated className="p-4 xs:p-5 sm:p-6 mt-6 lg:mt-0">
+                <Text variant="h2" className="mb-6 text-lg md:text-xl">
                   Application Documents
                 </Text>
                 <div className="space-y-6">
@@ -450,7 +458,7 @@ export default function JobDetailsPage() {
                       Resume
                     </Text>
                     {resumeUrl ? (
-                      <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                      <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex flex-col xs:flex-row items-start xs:items-center justify-between group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 gap-2">
                         <div className="flex items-center space-x-2">
                           <svg
                             className="w-5 h-5 text-gray-500 group-hover:text-primary-500 transition-colors duration-200"
@@ -508,7 +516,7 @@ export default function JobDetailsPage() {
                       Cover Letter
                     </Text>
                     {coverLetterUrl ? (
-                      <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                      <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex flex-col xs:flex-row items-start xs:items-center justify-between group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 gap-2">
                         <div className="flex items-center space-x-2">
                           <svg
                             className="w-5 h-5 text-gray-500 group-hover:text-primary-500 transition-colors duration-200"

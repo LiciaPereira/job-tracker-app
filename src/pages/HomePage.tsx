@@ -62,7 +62,7 @@ export default function HomePage() {
     }, 200);
   };
   return (
-    <div className={`min-h-screen ${theme.colors.background.page}`}>
+    <div className={`h-screen ${theme.colors.background.page}`}>
       {/* Background pattern */}
       <div className="absolute inset-0 z-0 opacity-40 dark:opacity-20">
         <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-r from-primary-100/50 to-primary-300/50 dark:from-primary-900/30 dark:to-primary-800/30 transform -skew-x-12" />
@@ -70,13 +70,13 @@ export default function HomePage() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex min-h-screen">
+      <div className="relative z-10 flex flex-col h-full lg:flex-row items-center justify-center">
         {/* Left section - Hero/Marketing */}
-        <div className="hidden lg:flex lg:flex-1 items-center justify-center p-12">
+        <div className="hidden lg:flex lg:flex-1 items-center justify-center p-4 sm:p-8 md:p-12">
           <div className="max-w-xl">
             <Text
               variant="h1"
-              className="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-400"
+              className="text-3xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-400"
             >
               Organize Your Job Search Journey
             </Text>
@@ -98,13 +98,12 @@ export default function HomePage() {
               />
             </div>
           </div>
-        </div>
-
-        {/* Right section - Auth form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        </div>{" "}
+        {/* Right section - Auth form, perfectly centered with no scroll */}
+        <div className="w-full flex items-center justify-center h-full p-0 lg:w-1/2 lg:h-screen">
           <Card
             elevated
-            className={`w-full max-w-md p-8 transform transition-all duration-200 ${
+            className={`w-full mx-6 max-w-md p-4 sm:p-6 md:p-8 transform transition-all duration-200 ${
               isAnimating ? "scale-95 opacity-50" : "scale-100 opacity-100"
             }`}
           >
@@ -126,7 +125,7 @@ export default function HomePage() {
                   </svg>
                 </div>
               </div>
-              <Text variant="h2" className="mb-2">
+              <Text variant="h2" className="mb-2 text-xl md:text-2xl">
                 {isLogin ? "Welcome Back!" : "Create Your Account"}
               </Text>
               <Text variant="body" color="primary">

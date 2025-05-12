@@ -58,12 +58,12 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col overflow-hidden">
+    <div className="h-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 flex flex-col overflow-x-hidden overflow-y-auto">
       {/* Header Section */}
       <div className="py-4 flex-shrink-0">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <Text variant="h1" className="mb-1">
+            <Text variant="h1" className="mb-1 text-2xl md:text-3xl">
               Welcome Back
               {user?.displayName ? `, ${user.displayName.split(" ")[0]}` : ""}!
             </Text>
@@ -72,14 +72,17 @@ export default function DashboardPage() {
             </Text>
           </div>
         </div>
-      </div>{" "}
+      </div>
       {/* Content Grid - Using remaining height */}
-      <div className="grid gap-4 md:grid-cols-12 flex-1 min-h-0 pb-4 overflow-hidden">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-12 flex-1 min-h-0 pb-4 overflow-hidden">
         {/* Stats Column */}
         <div className="md:col-span-8 flex flex-col min-h-0 overflow-hidden">
-          <Card elevated className="flex-1 overflow-hidden">
-            <div className="h-full flex flex-col p-4 overflow-hidden">
-              <Text variant="h2" className="mb-4 flex-shrink-0">
+          <Card elevated className="flex-1 overflow-hidden min-h-[300px]">
+            <div className="h-full flex flex-col p-2 sm:p-4 overflow-hidden">
+              <Text
+                variant="h2"
+                className="mb-4 flex-shrink-0 text-lg md:text-xl"
+              >
                 Job Application Stats
               </Text>
               <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
@@ -90,9 +93,9 @@ export default function DashboardPage() {
                 ) : (
                   <div className="space-y-4">
                     <SummaryCards stats={stats} />
-                    <div className="h-[300px] bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <div className="h-[180px] xs:h-[220px] md:h-[300px] bg-gray-50 dark:bg-gray-800 rounded-lg p-2 md:p-4">
                       {/* Placeholder for future chart/graph */}
-                      <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
+                      <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs xs:text-sm md:text-base">
                         Chart Coming Soon
                       </div>
                     </div>
@@ -101,11 +104,14 @@ export default function DashboardPage() {
               </div>
             </div>
           </Card>
-        </div>{" "}
+        </div>
         {/* Reminders Column */}
-        <div className="md:col-span-4 flex flex-col min-h-0 overflow-hidden">
-          <Card elevated className="flex-1 overflow-hidden">
-            <div className="h-full flex flex-col p-4 overflow-hidden">
+        <div className="md:col-span-4 flex flex-col min-h-0 overflow-hidden mt-4 md:mt-0">
+          <Card
+            elevated
+            className="flex-1 overflow-hidden min-h-[180px] xs:min-h-[220px] md:min-h-[200px]"
+          >
+            <div className="h-full flex flex-col p-2 sm:p-4 overflow-hidden">
               <RemindersPanel />
             </div>
           </Card>

@@ -40,6 +40,7 @@ const schema = yup.object().shape({
 }) as yup.ObjectSchema<FormValues>;
 
 export default function AddJobPage() {
+  const formRef = useRef<HTMLFormElement>(null); //add form reference
   const {
     register,
     handleSubmit,
@@ -120,16 +121,72 @@ export default function AddJobPage() {
   ];
   return (
     <div className="h-full w-full flex flex-col overflow-hidden">
+      {/*header with buttons that's always visible - matches JobDetailsPage */}
+      <div className="top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm py-3 z-1">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+          <div className="flex gap-2 xs:flex-row xs:justify-between xs:items-center">
+            <div className="flex-1 min-w-0">
+              <Text variant="h1" className="truncate">
+                Add New Job
+              </Text>
+            </div>
+            {/* Action button group */}
+            <div className="flex flex-row gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => navigate("/jobs")}
+                icon={
+                  <svg
+                    className="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    fill="none"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                }
+              ></Button>
+              <Button
+                type="submit"
+                form="add-job-form"
+                variant="primary"
+                size="sm"
+                icon={
+                  <svg
+                    className="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    fill="none"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                }
+              ></Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-8">
-            <Text variant="h1" className="mb-2">
-              Add New Job
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-6 md:py-8">
+          <div className="mb-6">
+            <Text variant="body" className="text-gray-600 dark:text-gray-400">
+              Track your new job application and related documents
             </Text>
-            <Text variant="body" color="primary">
-              Track your job application details and documents
-            </Text>
-          </div>{" "}
+          </div>
+
           {alert && (
             <div className="mb-6">
               <Alert
@@ -139,11 +196,16 @@ export default function AddJobPage() {
               />
             </div>
           )}
-          <form onSubmit={handleSubmit(onSubmit)}>
+
+          <form
+            id="add-job-form"
+            ref={formRef}
+            onSubmit={handleSubmit(onSubmit)}
+          >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column - Job Details */}
-              <Card elevated className="p-6">
-                <Text variant="h2" className="mb-6">
+              <Card elevated className="p-4 xs:p-5 sm:p-6">
+                <Text variant="h2" className="mb-6 text-lg md:text-xl">
                   Job Details
                 </Text>
                 <div className="space-y-4">
@@ -188,8 +250,8 @@ export default function AddJobPage() {
               </Card>
 
               {/* Right Column - Documents */}
-              <Card elevated className="p-6">
-                <Text variant="h2" className="mb-6">
+              <Card elevated className="p-4 xs:p-5 sm:p-6 mt-6 lg:mt-0">
+                <Text variant="h2" className="mb-6 text-lg md:text-xl">
                   Documents
                 </Text>
                 <div className="space-y-6">
@@ -208,7 +270,7 @@ export default function AddJobPage() {
                       }}
                     />
                     {resumePreview && (
-                      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex flex-col xs:flex-row items-start xs:items-center justify-between group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 gap-2">
                         <div className="flex items-center space-x-2">
                           <svg
                             className="w-5 h-5 text-gray-500 group-hover:text-primary-500 transition-colors duration-200"
@@ -259,7 +321,7 @@ export default function AddJobPage() {
                       }}
                     />
                     {coverLetterPreview && (
-                      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex flex-col xs:flex-row items-start xs:items-center justify-between group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 gap-2">
                         <div className="flex items-center space-x-2">
                           <svg
                             className="w-5 h-5 text-gray-500 group-hover:text-primary-500 transition-colors duration-200"
@@ -296,38 +358,6 @@ export default function AddJobPage() {
                   </div>
                 </div>
               </Card>
-            </div>
-
-            {/* Submit Button - Full Width Below Grid */}
-            <div className="mt-8 flex justify-end gap-4">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => navigate("/jobs")}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                icon={
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                }
-              >
-                Add Job
-              </Button>
             </div>
           </form>
         </div>
