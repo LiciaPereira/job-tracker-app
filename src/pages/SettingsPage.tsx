@@ -42,7 +42,6 @@ const passwordSchema = yup.object().shape({
 
 export default function SettingsPage() {
   const { user } = useAuth();
-  const { theme } = useTheme();
   const [alert, setAlert] = useState<{
     type: "success" | "error";
     message: string;

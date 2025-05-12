@@ -4,7 +4,6 @@ import { getJobsByUser } from "../features/jobs/services/getJobByUser";
 import { SummaryCards } from "../features/jobs/SummaryCards";
 import { RemindersPanel } from "../features/jobs/RemindersPanel";
 import { Card, Text } from "../components/ui";
-import { useTheme } from "../hooks/useTheme";
 
 interface Stats {
   total: number;
@@ -15,7 +14,6 @@ interface Stats {
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
-  const { theme } = useTheme();
   const [stats, setStats] = useState<Stats>({
     total: 0,
     interviews: 0,

@@ -9,17 +9,20 @@ import {
   doc,
   Timestamp,
   deleteDoc,
+  getDoc,
 } from "firebase/firestore";
 
 //reminder type for job follow-ups
 export interface Reminder {
-  id?: string;
+  id: string;
   jobId: string;
   userId: string;
   type: "followUp";
   dueDate: Date;
   completed: boolean;
   createdAt: Date;
+  title?: string;
+  company?: string;
 }
 
 //create a new reminder for a job
@@ -34,19 +37,46 @@ export async function createReminder(
 }
 
 //get all active reminders for a user
-export async function getActiveReminders(userId: string) {
+export async function getActiveReminders(userId: string): Promise<Reminder[]> {
   const q = query(
     collection(db, "reminders"),
     where("userId", "==", userId),
     where("completed", "==", false)
   );
+
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-    dueDate: doc.data().dueDate.toDate(),
-    createdAt: doc.data().createdAt.toDate(),
-  })) as Reminder[];
+
+  const reminders = await Promise.all(
+    snapshot.docs.map(async (docSnap) => {
+      const raw = docSnap.data();
+
+      const reminder: Reminder = {
+        id: docSnap.id,
+        jobId: raw.jobId,
+        userId: raw.userId,
+        type: raw.type,
+        completed: raw.completed,
+        dueDate: raw.dueDate.toDate(),
+        createdAt: raw.createdAt.toDate(),
+      };
+
+      // enrich with job info
+      try {
+        const jobSnap = await getDoc(doc(db, "jobs", reminder.jobId));
+        if (jobSnap.exists()) {
+          const jobData = jobSnap.data();
+          reminder.title = jobData.title || "";
+          reminder.company = jobData.company || "";
+        }
+      } catch (err) {
+        console.warn(`Failed to enrich reminder ${reminder.id}:`, err);
+      }
+
+      return reminder;
+    })
+  );
+
+  return reminders;
 }
 
 //mark a reminder as completed

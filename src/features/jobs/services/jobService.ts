@@ -1,7 +1,5 @@
 import { db } from "../../../lib/firebase";
 import { doc, getDoc, deleteDoc, updateDoc } from "firebase/firestore";
-import { createReminder } from "./reminderService";
-import { addDays } from "date-fns";
 
 //get a job by ID
 export async function getJobById(jobId: string) {
@@ -25,15 +23,4 @@ export async function updateJob(jobId: string, userId: string, updates: any) {
     resume: updates.resume ?? null,
     coverLetter: updates.coverLetter ?? null,
   });
-
-  //create follow-up reminder if status changed to applied
-  if (updates.status === "applied") {
-    await createReminder({
-      jobId,
-      userId,
-      type: "followUp",
-      dueDate: addDays(new Date(), 3),
-      completed: false,
-    });
-  }
 }

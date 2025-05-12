@@ -4,7 +4,6 @@ import { getJobsByUser } from "../features/jobs/services/getJobByUser";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { exportToCSV } from "../utils/csvExport";
 import { Card, Text, Button } from "../components/ui";
-import { useTheme } from "../hooks/useTheme";
 import { PaperclipIcon } from "../components/ui/icons";
 
 interface Job {
@@ -20,7 +19,6 @@ interface Job {
 
 export default function JobListPage() {
   const { user, loading } = useAuth();
-  const { theme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -244,7 +242,7 @@ export default function JobListPage() {
                     interactive
                     elevated
                     className="group"
-                    onClick={() => navigate(`/job/${job.id}`)}
+                    onClick={() => navigate(`/jobs/${job.id}`)}
                   >
                     <div className="p-4">
                       <div className="flex items-start justify-between">

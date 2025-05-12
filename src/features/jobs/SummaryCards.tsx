@@ -23,7 +23,7 @@ export function SummaryCards({ stats }: SummaryCardsProps) {
         aria-label="Click to view all applications"
       >
         <StatCard
-          label="Applications Sent"
+          label="Total"
           value={stats.total}
           onClick={() => navigateToFilteredJobs(null)}
         />

@@ -39,7 +39,7 @@ function App() {
             }
           />
           <Route
-            path="/job/:jobId"
+            path="/jobs/:jobId"
             element={
               <PrivateRoute>
                 <JobDetailsPage />

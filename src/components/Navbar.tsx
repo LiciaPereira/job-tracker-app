@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
 import { logout } from "../services/authService";
-import { Button, Text } from "./ui";
+import { Button } from "./ui";
 import { useTheme } from "../hooks/useTheme";
 
 export function Navbar() {
-  const { user } = useAuth();
   const { darkMode, toggleDarkMode, theme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();

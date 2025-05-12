@@ -19,7 +19,7 @@ export function SwitchWithDays({
   const id = useId();
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 ">
       {/* Toggle */}
       <button
         id={id}
@@ -40,7 +40,7 @@ export function SwitchWithDays({
       {/* Label + conditional input */}
       <label
         htmlFor={id}
-        className="text-sm text-white flex items-center gap-1"
+        className="text-sm flex items-center gap-1 dark:text-gray-200"
       >
         Enable Reminder{" "}
         {checked && (
@@ -52,7 +52,7 @@ export function SwitchWithDays({
               max={365}
               value={days}
               onChange={(e) => onDaysChange(Number(e.target.value))}
-              className="w-8 text-center bg-transparent border-b border-gray-400 text-white px-1 py-0.5 text-sm focus:outline-none"
+              className="w-8 text-center bg-transparent border-b border-gray-400 px-1 py-0.5 text-sm focus:outline-none"
             />
             days
           </>

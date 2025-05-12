@@ -4,15 +4,17 @@ import {
   getActiveReminders,
   completeReminder,
   Reminder,
+  updateReminder,
+  deleteReminder,
 } from "./services/reminderService";
-import { format } from "date-fns";
-import { Link } from "react-router-dom";
 import { Alert } from "../../components/Alert";
-import { Card, Text, Button } from "../../components/ui";
+import { Text } from "../../components/ui";
 import { ReminderSkeleton } from "../../components/ReminderSkeleton";
 import { CalendarIcon } from "@heroicons/react/24/outline";
 import { ReminderItem } from "../../components/ReminderItem";
 import { EmptyState } from "../../components/EmptyState";
+import { addDays } from "date-fns";
+import { updateJob } from "./services/jobService";
 
 interface RemindersPanelProps {
   // If true, displays the header with title and count. If false, hides the header.
@@ -61,6 +63,42 @@ const RemindersPanel = ({ showHeader = true }: RemindersPanelProps) => {
       setAlert({ type: "error", message: "Failed to update reminder" });
     }
   };
+
+  const handlePostpone = async (reminderId: string) => {
+    try {
+      const reminder = reminders.find((r) => r.id === reminderId);
+      if (!reminder) return;
+
+      const newDate = addDays(reminder.dueDate, 3);
+      await updateReminder(reminderId, { dueDate: newDate });
+
+      setReminders((prev) =>
+        prev.map((r) => (r.id === reminderId ? { ...r, dueDate: newDate } : r))
+      );
+
+      setAlert({ type: "success", message: "Reminder postponed!" });
+    } catch (err) {
+      setAlert({ type: "error", message: "Failed to postpone reminder." });
+    }
+  };
+
+  const handleDelete = async (reminderId: string) => {
+    if (!user) return;
+
+    try {
+      const reminder = reminders.find((r) => r.id === reminderId);
+      if (!reminder) return;
+
+      await deleteReminder(reminderId);
+      await updateJob(reminder.jobId, user.uid, { reminderId: null });
+
+      setReminders((prev) => prev.filter((r) => r.id !== reminderId));
+      setAlert({ type: "success", message: "Reminder deleted!" });
+    } catch (err) {
+      setAlert({ type: "error", message: "Failed to delete reminder." });
+    }
+  };
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-4 items-baseline">
@@ -101,6 +139,8 @@ const RemindersPanel = ({ showHeader = true }: RemindersPanelProps) => {
                   key={reminder.id}
                   reminder={reminder}
                   onComplete={handleComplete}
+                  onPostpone={handlePostpone}
+                  onDelete={handleDelete}
                 />
               ))}
             </ul>

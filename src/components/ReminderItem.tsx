@@ -1,38 +1,73 @@
-import React from "react";
 import { format } from "date-fns";
-import { Card, Text, Button } from "./ui";
-import { Reminder } from "../features/jobs/services/reminderService";
+import { Link } from "react-router-dom";
+import { CheckIcon, ClockIcon, TrashIcon } from "../components/ui/icons";
 
 interface ReminderItemProps {
-  reminder: Reminder;
-  onComplete?: (id: string) => void;
+  reminder: {
+    id: string;
+    jobId: string;
+    dueDate: Date;
+    type: string;
+    completed: boolean;
+    createdAt: Date;
+    company?: string;
+    title?: string;
+  };
+  onComplete: (reminderId: string) => void;
+  onDelete?: (reminderId: string) => void;
+  onPostpone?: (reminderId: string) => void;
 }
 
-export const ReminderItem: React.FC<ReminderItemProps> = ({
+export const ReminderItem = ({
   reminder,
   onComplete,
-}) => {
+  onDelete,
+  onPostpone,
+}: ReminderItemProps) => {
   return (
-    <Card className="p-4">
-      <div className="flex justify-between items-start">
-        <div>
-          <Text variant="h3" className="text-sm font-medium mb-1">
-            Follow up
-          </Text>
-          <Text variant="small" className="text-gray-500">
-            Due {format(reminder.dueDate, "MMM d, yyyy")}
-          </Text>
-        </div>
-        {onComplete && (
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => onComplete(reminder.id!)}
+    <li className="bg-white dark:bg-gray-900 shadow-md rounded-md p-4 flex justify-between items-center">
+      <Link to={`/jobs/${reminder.jobId}`} className="flex-1">
+        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+          {reminder.title}
+        </p>
+        <p className="text-sm text-gray-500">{reminder.company}</p>
+        <p className="text-xs text-gray-400 mt-1">
+          Due at {format(reminder.dueDate, "MMMM d, yyyy")}
+        </p>
+      </Link>
+      <div className="flex gap-2">
+        {onDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(reminder.id);
+            }}
+            title="Delete"
+            className="text-red-500 hover:text-red-600 transition"
           >
-            Complete
-          </Button>
+            <TrashIcon />
+          </button>
         )}
+        {onPostpone && (
+          <button
+            onClick={() => onPostpone(reminder.id)}
+            title="Postpone"
+            className="text-yellow-500 hover:text-yellow-600 transition"
+          >
+            <ClockIcon />
+          </button>
+        )}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onComplete(reminder.id);
+          }}
+          title="Complete"
+          className="text-green-500 hover:text-green-600 transition"
+        >
+          <CheckIcon />
+        </button>
       </div>
-    </Card>
+    </li>
   );
 };

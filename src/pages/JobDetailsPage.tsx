@@ -2,12 +2,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { onSnapshot, doc } from "firebase/firestore";
 import * as yup from "yup";
-import {
-  getJobById,
-  deleteJobById,
-  updateJob,
-} from "../features/jobs/services/jobService";
+import { deleteJobById, updateJob } from "../features/jobs/services/jobService";
 import { useAuth } from "../hooks/useAuth";
 import { Alert } from "../components/Alert";
 import { useBlocker } from "../hooks/useBlocker";
@@ -28,6 +25,7 @@ import {
   updateReminder,
 } from "../features/jobs/services/reminderService";
 import { addDays } from "date-fns";
+import { db } from "../lib/firebase";
 
 interface Job {
   id: string;
@@ -62,6 +60,7 @@ const schema = yup.object().shape({
 }) as yup.ObjectSchema<FormValues>;
 
 export default function JobDetailsPage() {
+  const formRef = useRef<HTMLFormElement>(null);
   const { jobId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -90,44 +89,75 @@ export default function JobDetailsPage() {
   const [isCoverLetterChanged, setIsCoverLetterChanged] = useState(false);
 
   //reminders
-  const [reminderEnabled, setReminderEnabled] = useState(true);
+  const [reminderEnabled, setReminderEnabled] = useState(false);
   const [reminderDays, setReminderDays] = useState(3);
+  const initialReminderDays = useRef(reminderDays);
+  const initialReminderEnabled = useRef(false);
+  const isReminderDaysChanged = reminderDays !== initialReminderDays.current;
+  const isreminderChanged = reminderEnabled !== initialReminderEnabled.current;
 
   // fetch job details
   useEffect(() => {
     if (!user || !jobId) return;
-    const fetchJob = async () => {
-      try {
-        console.log("Fetching job with ID:", jobId);
-        const data = (await getJobById(jobId)) as Job;
-        console.log("Fetched job data:", data);
 
-        setJob(data);
-        reset({
-          company: data.company,
-          title: data.title,
-          status: data.status,
-          notes: data.notes || "",
-          resumeUrl: data.resume?.url || "",
-          coverLetterUrl: data.coverLetter?.url || "",
-        });
-
-        setReminderEnabled(!!data.reminderId); // enable if there's a reminder
-        setResumeUrl(data.resume?.url || null);
-        setResumeName(data.resume?.name || null);
-        setCoverLetterUrl(data.coverLetter?.url || null);
-        setCoverLetterName(data.coverLetter?.name || null);
-
-        console.log("State updated with job data");
-      } catch (err: any) {
-        console.error("Error fetching job:", err);
-        setAlert({ type: "error", message: err.message });
-      } finally {
+    const jobRef = doc(db, "jobs", jobId);
+    const unsubscribeJob = onSnapshot(jobRef, (docSnap) => {
+      if (!docSnap.exists()) {
+        setAlert({ type: "error", message: "Job not found" });
         setLoading(false);
+        return;
       }
-    };
-    fetchJob();
+
+      const data = docSnap.data();
+
+      setJob({ id: docSnap.id, ...(data as Omit<Job, "id">) });
+      reset({
+        company: data.company,
+        title: data.title,
+        status: data.status,
+        notes: data.notes || "",
+        resumeUrl: data.resume?.url || "",
+        coverLetterUrl: data.coverLetter?.url || "",
+      });
+
+      const reminderExists = !!data.reminderId;
+      setReminderEnabled(reminderExists);
+      initialReminderEnabled.current = reminderExists;
+
+      setResumeUrl(data.resume?.url || null);
+      setResumeName(data.resume?.name || null);
+      setCoverLetterUrl(data.coverLetter?.url || null);
+      setCoverLetterName(data.coverLetter?.name || null);
+      setLoading(false);
+    });
+
+    return () => unsubscribeJob();
   }, [user, jobId, reset]);
+
+  useEffect(() => {
+    if (!job?.reminderId) return;
+
+    const reminderRef = doc(db, "reminders", job.reminderId);
+    const unsubscribeReminder = onSnapshot(reminderRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const reminderData = docSnap.data();
+        const dueDate = reminderData.dueDate.toDate();
+        const isCompleted = reminderData.completed;
+
+        if (isCompleted) {
+          setReminderEnabled(false); //disable the switch if reminder is complete
+          return;
+        }
+        const daysDiff = Math.round(
+          (dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24) //add a race condition guard
+        );
+        setReminderDays(daysDiff);
+        initialReminderDays.current = daysDiff;
+      }
+    });
+
+    return () => unsubscribeReminder();
+  }, [job?.reminderId]);
 
   useBlocker({
     when: isDirty,
@@ -180,11 +210,13 @@ export default function JobDetailsPage() {
       //reminder sync logic
       if (reminderEnabled) {
         if (job?.reminderId) {
+          //just update the existing reminder
           await updateReminder(job.reminderId, {
             dueDate: addDays(new Date(), reminderDays),
             completed: false,
           });
         } else {
+          //create a new reminder and attach to the job
           const reminderRef = await createReminder({
             jobId,
             userId: user.uid,
@@ -195,6 +227,7 @@ export default function JobDetailsPage() {
           await updateJob(jobId, user.uid, { reminderId: reminderRef.id });
         }
       } else if (job?.reminderId) {
+        //disable reminder (delete it and unlink from job)
         await deleteReminder(job.reminderId);
         await updateJob(jobId, user.uid, { reminderId: null });
       }
@@ -273,27 +306,81 @@ export default function JobDetailsPage() {
                 Manage your application details and documents
               </Text>
             </div>
-            <Button
-              variant="danger"
-              onClick={handleDelete}
-              icon={
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              }
-            >
-              Delete Job
-            </Button>
+            <div className="flex items-center gap-3 ml-auto">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  reset();
+                  setIsResumeChanged(false);
+                  setIsCoverLetterChanged(false);
+                }}
+                icon={
+                  <svg
+                    className="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    fill="none"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                }
+              ></Button>
+
+              {(isDirty ||
+                isResumeChanged ||
+                isCoverLetterChanged ||
+                isreminderChanged ||
+                isReminderDaysChanged) && (
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                  onClick={() => formRef.current?.requestSubmit()}
+                  icon={
+                    <svg
+                      className="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      fill="none"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  }
+                ></Button>
+              )}
+
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={handleDelete}
+                icon={
+                  <svg
+                    className="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    fill="none"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                }
+              ></Button>
+            </div>
           </div>
 
           {alert && (
@@ -306,7 +393,7 @@ export default function JobDetailsPage() {
             </div>
           )}
 
-          <form onSubmit={onSubmit}>
+          <form ref={formRef} onSubmit={onSubmit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column - Job Details */}
               <Card elevated className="p-6">
@@ -475,44 +562,6 @@ export default function JobDetailsPage() {
                 </div>
               </Card>
             </div>
-
-            {/* Save Changes Button */}
-            {(isDirty || isResumeChanged || isCoverLetterChanged) && (
-              <div className="mt-8 flex justify-end gap-4">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => {
-                    reset();
-                    setIsResumeChanged(false);
-                    setIsCoverLetterChanged(false);
-                  }}
-                >
-                  Cancel Changes
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  icon={
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  }
-                >
-                  Save Changes
-                </Button>
-              </div>
-            )}
           </form>
         </div>
       </div>
